@@ -172,12 +172,6 @@ core** = imported by many other scripts, treat signature changes as breaking.
 |---|---|---|
 | `experiments/make_charts.py`, `make_charts_exp02.py`, `..._exp03.py`, `..._exp04.py`, `..._exp09.py`, `..._exp10.py`, `..._exp12.py` | Generate standalone SVG charts from hardcoded eval numbers, one file per experiment; some also do the SVG→PNG Chrome-headless conversion for ClickUp. Pattern: copy the most recent one (`make_charts_exp12.py`) rather than starting from scratch. | Active (one-off per experiment, expected to keep growing — this is normal, not debt) |
 
-## Repo-root infra
-
-| File | Purpose | Status |
-|---|---|---|
-| `mount.sh` / `unmount.sh` / `serve.py` | Mount the RunPod network volume locally via WebDAV. **Documentation-only — too slow for real use** (see `docs/AUDIT_HISTORY.md` / memory `pod-mount-not-used`); all real work happens over SSH on the pod. | Active but not the real workflow |
-
 ---
 
 **Maintenance rule:** when you add a new script, add one row here in the same pass (same PR/session) — don't let this drift back into prose. When a script is superseded, change its Status rather than deleting the row (the old tool is still often the correct reference for "how did we do X before").

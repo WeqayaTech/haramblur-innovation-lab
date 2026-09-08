@@ -115,9 +115,7 @@ Innovation-lab/
 │   ├── EXP-YYYY-NN-POD-RUNBOOK.md / -TEAM-BRIEF.md / -CLICKUP-READY.md  # supplementary
 │   └── make_charts*.py, assets/  # chart generation, one script per experiment
 ├── vlm-cluster/                 # the tools — see docs/CODEMAP.md for what each does
-├── dataset-diversity-audit/     # Track 4: CV-only diversity spike (own README)
-├── runpod-ssh/                  # how to SSH into a GPU pod
-└── mount.sh / serve.py          # local volume mount (documentation-only, see below)
+└── dataset-diversity-audit/     # Track 4: CV-only diversity spike (own README)
 ```
 
 ## Infrastructure (read before running anything)
@@ -131,8 +129,10 @@ Innovation-lab/
   `README.md` manifest and a row in `docs/DATASET_REGISTRY.md`. Never put the string
   `"negative"` in a dataset folder name — `autolabel_sam.py` silently skips such paths.
   Experiment-specific outputs (not reusable datasets) live under `/workspace/expNN/`.
-- **The local WebDAV mount (`mount.sh`) is documentation-only** — too slow for real use. All
-  volume work happens over SSH on the pod; transfer files with scp or heredoc.
+- **All volume access is over SSH on the pod** — connect via the RunPod console (Web Terminal,
+  or SSH over exposed TCP for VS Code Remote-SSH), attach the shared network volume to any pod
+  in its datacenter, and transfer files with scp or heredoc. There is no local mount tool in
+  this repo (removed 2026-09-08 — it was WebDAV-based and too slow for real use).
 - **Picking a pod:** explicitly choose an L4 or A100 — Blackwell (sm_120) pods need a specific
   cu128 torch build (see memory `blackwell-pod-torch-cu128`). Fresh pods also ship a
   torch/transformers mismatch that breaks SAM3 import — reinstall

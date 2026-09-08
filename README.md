@@ -1,146 +1,58 @@
-# RunPod Volume — Local Access
+# HaramBlur — Innovation Lab
 
-Browse and edit the shared RunPod network volume directly from VS Code /
-Finder on your Mac, without spinning up a pod. Mounts as a real read-write
-folder. Nothing from the volume is downloaded or cached — files stream on
-demand, so this works fine even though the volume is hundreds of GB.
+Experiment tracking and evaluation tooling for HaramBlur's person-detection / age-classification
+/ gender-classification pipeline: the automated labeling pipeline that produces training data,
+the models trained on it, and the benchmarks used to compare candidates.
 
-Also includes a CLI for one-off uploads/downloads and a `sync` workflow for
-pulling a specific project folder locally to work on offline.
+**Start here: [`CLAUDE.md`](CLAUDE.md).** It's the map for this repo — mission, current best
+model, and pointers to everything below. This README is just the quick-start.
 
----
+## What's in this repo
 
-## 1. One-time setup
+This repo holds **source and documentation only** — code, experiment write-ups, and reference
+docs. It does **not** hold data, model weights, or generated reports; those live on the shared
+RunPod network volume (`/workspace/...`) and are reproducible from the tools here. See
+`docs/DATASET_REGISTRY.md` for what's on the volume and `.gitignore` for what's deliberately
+kept out of git.
 
-```bash
-git clone <this-repo>
-cd Innovation-lab
-pip install -r requirements.txt
-cp .env.example .env
-```
+| Where | What |
+|---|---|
+| `docs/EXPERIMENT_LOG.md` | Every experiment run, one row, sorted by date |
+| `docs/CODEMAP.md` | Every script's purpose — check here before writing a new one |
+| `docs/MODEL_COMPARISON.md` | Every model measured, exact run names + weights paths |
+| `docs/DATASET_REGISTRY.md` | Every dataset on the volume, path + purpose + status |
+| `experiments/EXP-YYYY-NN-*.md` | Full write-up per experiment (bar → method → result) |
+| `vlm-cluster/` | The tools (labeling, scoring, training, reporting — see `docs/CODEMAP.md`) |
 
-### Get your RunPod S3 credentials
+## Setup
 
-The volume is accessed through RunPod's S3-compatible API. **This needs a
-separate S3 access key — your normal RunPod API key (`rpa_...`) will NOT
-work for this.**
-
-1. Go to the RunPod console → **Storage → Network Volumes**
-2. Click on the team's volume
-3. Find the **S3 Access** / **S3 Credentials** section
-4. Copy the **Access Key ID** (looks like `user_xxxxxxxxxxxxxxxxxxxx`) and
-   **Secret Access Key** (looks like `rps_xxxxxxxxxxxxxxxxxxxx`)
-
-### Fill in `.env`
+GPU work and all volume access happen on a RunPod pod over SSH — there's no local data mount in
+this repo. To work on the tooling itself:
 
 ```bash
-RUNPOD_API_KEY=user_xxxxxxxxxxxxxxxxxxxx       # the S3 Access Key ID
-RUNPOD_SECRET_KEY=rps_xxxxxxxxxxxxxxxxxxxx      # the S3 Secret Access Key
-RUNPOD_BUCKET=xxxxxxxxxx                        # the Network Volume ID
-RUNPOD_REGION=eu-ro-1                           # region shown next to the volume
+git clone https://github.com/WeqayaTech/haramblur-innovation-lab.git
+cd haramblur-innovation-lab
+pip install -r vlm-cluster/requirements.txt
 ```
 
-`.env` is gitignored — never commit it.
-
-### Verify it works
+Most eval/scoring tools are CPU-only and self-test with zero data — a good first check:
 
 ```bash
-python -m runpod_volume.cli info
-python -m runpod_volume.cli ls
+python3 vlm-cluster/translation.py
+python3 vlm-cluster/eval_negatives_crowd.py --selftest
+python3 vlm-cluster/map_eval.py --selftest
 ```
 
-If this lists files from the volume, credentials are correct.
+Tools that call a commercial VLM (`describe.py --engine openai|gemini|claude`, `api_describers.py`)
+read API keys from a local `.env` (not tracked — never commit it). On the pod, the same tools
+source keys from the pod's own `.env`.
 
----
+For actual dataset/GPU work, attach the RunPod network volume to a pod (L4 or A100 — avoid
+Blackwell/sm_120, see `CLAUDE.md` → Infrastructure) and work over SSH; `docs/DATASET_REGISTRY.md`
+has the full access pattern.
 
-## 2. Mounting the volume (VS Code / Finder access)
+## Starting a new experiment
 
-```bash
-bash mount.sh
-```
-
-This starts a small local server and mounts the volume at `mnt/runpod/`
-using macOS's **built-in** WebDAV client — no macFUSE, no kernel extension,
-no reboot required.
-
-```bash
-code mnt/runpod         # open in VS Code
-open mnt/runpod          # open in Finder
-```
-
-You can browse folders, open files, edit and save — changes write straight
-back to the volume. Nothing is cached locally; opening a file streams it
-from S3, closing it doesn't leave a copy on your Mac.
-
-When done:
-
-```bash
-bash unmount.sh
-```
-
-**⚠️ Shared team volume — be careful with deletes.** This mount is
-read-write. Deleting a file or folder in Finder/VS Code deletes it from the
-volume for everyone. There's no trash/undo. Don't run automated cleanup
-scripts against the mount unless you're sure of the path.
-
-### If mounting fails / shows nothing
-
-- Make sure `bash mount.sh` printed "Volume mounted at: ..." without errors
-- Check `.env` has the **S3 access key**, not the general RunPod API key
-- Run `bash unmount.sh` then `bash mount.sh` again
-- Folder listings can take a few seconds the first time you open them
-  (subsequent opens within ~20s are cached and instant)
-
----
-
-## 3. CLI — quick one-off operations
-
-For when you don't want to mount, just need one file:
-
-```bash
-python -m runpod_volume.cli ls [PREFIX]              # list files
-python -m runpod_volume.cli get <REMOTE_KEY> <LOCAL>  # download one file
-python -m runpod_volume.cli put <LOCAL> <REMOTE_KEY>  # upload one file
-python -m runpod_volume.cli rm  <REMOTE_KEY>          # delete (asks to confirm)
-python -m runpod_volume.cli url <REMOTE_KEY>          # pre-signed download link
-```
-
----
-
-## 4. Syncing a whole project folder locally
-
-If you want a full local copy of one project (e.g. to train/run code with
-it, or because the mount feels slow for very large/deep folders — like a
-git repo with thousands of small files), use sync instead of the mount:
-
-```bash
-python -m runpod_volume.cli sync-pull YOLO-MIT/runs   # downloads to workspace/YOLO-MIT/runs
-# ... work on it locally ...
-python -m runpod_volume.cli sync-push YOLO-MIT/runs   # uploads only changed files back
-```
-
-Sync only transfers files that changed (by size), so re-running it is fast.
-Be mindful of folder size before syncing — check first with:
-
-```bash
-python -m runpod_volume.cli ls YOLO-MIT/runs
-```
-
----
-
-## How it works (for the curious / troubleshooting)
-
-- `runpod_volume/client.py` — boto3 S3 client wrapper, talks to RunPod's
-  S3-compatible API (`https://s3api-<region>.runpod.io`)
-- `runpod_volume/webdav_provider.py` — translates WebDAV requests
-  (PROPFIND/GET/PUT/DELETE) into S3 calls, read-write, with a short
-  in-memory cache for directory listings
-- `serve.py` — runs the WebDAV server locally
-- `mount.sh` / `unmount.sh` — start the server and mount it via macOS's
-  built-in `mount_webdav`
-
-**Known RunPod S3 quirk handled internally:** RunPod's S3 endpoint ignores
-the `Prefix` parameter unless `Delimiter` is also set, and listing
-`Prefix=<file>/` on an existing file incorrectly echoes back a fake
-directory entry. The provider works around both — you don't need to know
-this to use the tool, but it explains some of the code if you're reading it.
+Copy `experiments/EXPERIMENT_TEMPLATE.md` to `experiments/EXP-YYYY-NN-<slug>.md`, write the
+question and the pre-registered "good enough" bar *before* running anything, then add a row to
+`docs/EXPERIMENT_LOG.md` once it's closed. Full conventions are in `CLAUDE.md`.

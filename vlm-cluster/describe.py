@@ -31,7 +31,7 @@ import cv2
 
 import dataset_utils as du
 
-try:  # pulls OPENAI_API_KEY / GOOGLE_API_KEY / ANTHROPIC_API_KEY from .env, same as serve.py
+try:  # pulls OPENAI_API_KEY / GOOGLE_API_KEY / ANTHROPIC_API_KEY from .env
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:

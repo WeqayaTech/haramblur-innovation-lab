@@ -132,25 +132,21 @@ EOF
 
 ## For developers — using and testing the datasets
 
-Three access paths, in order of usefulness:
+Two access paths, in order of usefulness:
 
-1. **GPU work: attach the network volume to your pod** (any pod in the volume's datacenter —
-   see `runpod-ssh/HOW_TO_SSH_RUNPOD.md`; pick an L4/A100, not Blackwell, or apply
-   `vlm-cluster/SETUP_BLACKWELL.md`). Everything is at `/workspace/datasets/<name>/` plus
-   LAGENDA at `/workspace/lagenda_eval/`.
-2. **Local browsing / CPU-only scoring: `bash mount.sh`** mounts the volume read-write at
-   `./mnt/runpod/` over WebDAV (credentials in `.env`, see the repo README). Fine for
-   spot-checking images, reading annotation files, and CPU-only evals; too slow for training or
-   GPU runs.
-3. **No access needed at all for tool development:** the scorers self-test synthetically —
+1. **GPU work: attach the network volume to your pod** (any pod in the volume's datacenter, via
+   the RunPod console — SSH over exposed TCP for VS Code Remote-SSH, or the Web Terminal; pick
+   an L4/A100, not Blackwell, or apply `vlm-cluster/SETUP_BLACKWELL.md`). Everything is at
+   `/workspace/datasets/<name>/` plus LAGENDA at `/workspace/lagenda_eval/`. There is no local
+   mount tool in this repo — all volume access is over SSH on the pod.
+2. **No access needed at all for tool development:** the scorers self-test synthetically —
    `python3 eval_negatives_crowd.py --selftest`, `run_autolabel_on_manifest.py --selftest`,
    `translation.py` — so a developer can modify eval code and test it with zero data.
 
-**First command on any fresh pod or mount** (CPU-only, seconds):
+**First command on any fresh pod** (CPU-only, seconds):
 
 ```bash
 python3 vlm-cluster/verify_datasets.py                 # on the pod (root /workspace)
-python3 vlm-cluster/verify_datasets.py --root ./mnt/runpod   # locally via the mount
 ```
 
 It checks every staged dataset against the expected counts in this registry and prints
