@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" font-family="system-ui,sans-serif">
+<rect width="900" height="500" fill="white"/>
+<text x="450.0" y="30" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1d25">Spotlight pipeline vs raw SAM3 labels</text>
+<text x="450.0" y="51" text-anchor="middle" font-size="12.5" fill="#8899aa">SAM3-alone figures from EXP-2026-02 (different sample — a like-for-like re-measurement is still owed). Higher is better in all four.</text>
+<line x1="70" y1="370.0" x2="860" y2="370.0" stroke="#dfe3ea"/>
+<text x="62" y="374.0" text-anchor="end" font-size="11" fill="#8899aa">0%</text>
+<line x1="70" y1="300.0" x2="860" y2="300.0" stroke="#dfe3ea"/>
+<text x="62" y="304.0" text-anchor="end" font-size="11" fill="#8899aa">25%</text>
+<line x1="70" y1="230.0" x2="860" y2="230.0" stroke="#dfe3ea"/>
+<text x="62" y="234.0" text-anchor="end" font-size="11" fill="#8899aa">50%</text>
+<line x1="70" y1="160.0" x2="860" y2="160.0" stroke="#dfe3ea"/>
+<text x="62" y="164.0" text-anchor="end" font-size="11" fill="#8899aa">75%</text>
+<line x1="70" y1="90.0" x2="860" y2="90.0" stroke="#dfe3ea"/>
+<text x="62" y="94.0" text-anchor="end" font-size="11" fill="#8899aa">100%</text>
+<rect x="108.4" y="121.6" width="55.3" height="248.4" rx="3" fill="#9aa7b5"/>
+<text x="136.1" y="114.6" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">88.7%</text>
+<rect x="173.8" y="92.0" width="55.3" height="278.0" rx="3" fill="#27ae60"/>
+<text x="201.4" y="85.0" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">99.3%</text>
+<text x="168.8" y="388.0" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25">Label accuracy</text>
+<text x="168.8" y="403.0" text-anchor="middle" font-size="10" fill="#8899aa">3-class, teen-tolerant</text>
+<rect x="305.9" y="119.4" width="55.3" height="250.6" rx="3" fill="#9aa7b5"/>
+<text x="333.6" y="112.4" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">89.5%</text>
+<rect x="371.2" y="90.0" width="55.3" height="280.0" rx="3" fill="#27ae60"/>
+<text x="398.9" y="83.0" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">100.0%</text>
+<text x="366.2" y="388.0" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25">Adults NOT leaking</text>
+<text x="366.2" y="403.0" text-anchor="middle" font-size="10" fill="#8899aa">18+ kept out of Child</text>
+<rect x="503.4" y="93.4" width="55.3" height="276.6" rx="3" fill="#9aa7b5"/>
+<text x="531.1" y="86.4" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">98.8%</text>
+<rect x="568.8" y="92.7" width="55.3" height="277.3" rx="3" fill="#27ae60"/>
+<text x="596.4" y="85.7" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">99.0%</text>
+<text x="563.8" y="388.0" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25">Gender on adults</text>
+<text x="563.8" y="403.0" text-anchor="middle" font-size="10" fill="#8899aa">when committed</text>
+<rect x="701.0" y="370.0" width="55.3" height="2.0" rx="3" fill="#9aa7b5"/>
+<text x="728.6" y="363.0" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">none</text>
+<rect x="766.2" y="112.4" width="55.3" height="257.6" rx="3" fill="#27ae60"/>
+<text x="793.9" y="105.4" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">92.0%</text>
+<text x="761.2" y="388.0" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25">Junk removed</text>
+<text x="761.2" y="403.0" text-anchor="middle" font-size="10" fill="#8899aa">genuine non-people</text>
+<rect x="70" y="458" width="14" height="14" rx="2" fill="#9aa7b5"/>
+<text x="90" y="469" font-size="11.5" fill="#1a1d25">SAM3 auto-labels today (EXP-2026-02)</text>
+<rect x="370" y="458" width="14" height="14" rx="2" fill="#27ae60"/>
+<text x="390" y="469" font-size="11.5" fill="#1a1d25">Spotlight v1 (EXP-2026-10, 5,236 detections)</text>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 426 350" font-family="system-ui,sans-serif">
+<rect width="426" height="350" fill="white"/>
+<text x="213.0" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1d25">Gender confusion matrix (adults)</text>
+<text x="213.0" y="50" text-anchor="middle" font-size="12.5" fill="#8899aa">Near-perfect: 21 wrong in 3,088 committed (99.3%). Abstains ~19%, shown separately.</text>
+<text x="258.0" y="80" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25">VLM predicted →</text>
+<text x="166.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">Woman</text>
+<text x="258.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">Man</text>
+<text x="350.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">(abstain)</text>
+<text x="110" y="146.0" text-anchor="end" font-size="12" fill="#1a1d25">Woman</text>
+<rect x="120" y="96" width="88" height="88" rx="4" fill="#27ae60" fill-opacity="0.77" stroke="#dfe3ea"/>
+<text x="164.0" y="138.0" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">1516</text>
+<text x="164.0" y="154.0" text-anchor="middle" font-size="10.5" fill="#ffffff">78%</text>
+<rect x="212" y="96" width="88" height="88" rx="4" fill="#e74c3c" fill-opacity="0.12" stroke="#dfe3ea"/>
+<text x="256.0" y="138.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">6</text>
+<text x="256.0" y="154.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">0%</text>
+<rect x="304" y="96" width="88" height="88" rx="4" fill="#8899aa" fill-opacity="0.30" stroke="#dfe3ea"/>
+<text x="348.0" y="138.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">424</text>
+<text x="348.0" y="154.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">22%</text>
+<text x="110" y="238.0" text-anchor="end" font-size="12" fill="#1a1d25">Man</text>
+<rect x="120" y="188" width="88" height="88" rx="4" fill="#e74c3c" fill-opacity="0.13" stroke="#dfe3ea"/>
+<text x="164.0" y="230.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">15</text>
+<text x="164.0" y="246.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">1%</text>
+<rect x="212" y="188" width="88" height="88" rx="4" fill="#27ae60" fill-opacity="0.81" stroke="#dfe3ea"/>
+<text x="256.0" y="230.0" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">1551</text>
+<text x="256.0" y="246.0" text-anchor="middle" font-size="10.5" fill="#ffffff">84%</text>
+<rect x="304" y="188" width="88" height="88" rx="4" fill="#8899aa" fill-opacity="0.25" stroke="#dfe3ea"/>
+<text x="348.0" y="230.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">288</text>
+<text x="348.0" y="246.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">16%</text>
+<text x="14" y="188.0" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25" transform="rotate(-90 14 188.0)">Ground truth →</text>
+</svg>

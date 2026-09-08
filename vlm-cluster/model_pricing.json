@@ -1,0 +1,62 @@
+{
+  "_comment": "USD per 1,000,000 tokens. Rates hand-verified 2026-07-17 from screenshots of each vendor's OWN pricing page (not aggregators). Standard/short-context, non-cached, non-batch tier in every case \u2014 the tier our calls actually use. Batch APIs offer ~50% off at every vendor: relevant option for the scale-up run.",
+  "gpt-5.6-sol": {
+    "input_per_1m": 5.0,
+    "output_per_1m": 30.0,
+    "source": "developers.openai.com pricing page, short-context column",
+    "checked": "2026-07-17",
+    "note": "long-context tier is $10/$45 \u2014 irrelevant at our sizes"
+  },
+  "gemini-3.5-flash": {
+    "input_per_1m": 1.5,
+    "output_per_1m": 9.0,
+    "source": "ai.google.dev/gemini-api/docs/pricing, paid tier",
+    "checked": "2026-07-17",
+    "note": "output price INCLUDES thinking tokens \u2014 which is why api_describers counts thoughts_token_count"
+  },
+  "gemini-3.1-pro-preview": {
+    "input_per_1m": 2.0,
+    "output_per_1m": 12.0,
+    "source": "ai.google.dev/gemini-api/docs/pricing, paid tier, prompts <= 200k",
+    "checked": "2026-07-17",
+    "note": "output includes thinking tokens; >200k-prompt tier is $4/$18 \u2014 irrelevant at our sizes"
+  },
+  "claude-sonnet-5": {
+    "input_per_1m": 2.0,
+    "output_per_1m": 10.0,
+    "source": "platform.claude.com pricing page",
+    "checked": "2026-07-17",
+    "note": "INTRO pricing through 2026-08-31; becomes $3/$15 on Sep 1 (+50%) \u2014 re-run recompute_costs.py with updated rates for any post-August budgeting"
+  },
+  "qwen3.7-plus": {
+    "input_per_1m": 0.4,
+    "output_per_1m": 1.6,
+    "source": "alibabacloud.com Model Studio pricing, Singapore/International, <=256K tier",
+    "checked": "2026-07-17",
+    "note": "LIST price used for budgeting; limited-time 20% promo means actual bills run ~$0.32/$1.28 until it ends \u2014 dashboards will read ~20% under computed. Thinking-mode output same $1.60"
+  },
+  "claude-haiku-4-5-20251001": {
+    "input_per_1m": null,
+    "output_per_1m": null,
+    "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+    "note": "not in the comparison; fill if ever used"
+  },
+  "qwen3-vl-flash": {
+    "input_per_1m": null,
+    "output_per_1m": null,
+    "source": "alibabacloud.com Model Studio pricing (older dedicated VL line, budget option)",
+    "note": "not in the comparison; fill if ever used"
+  },
+  "gemini-3.6-flash": {
+    "input_per_1m": null,
+    "output_per_1m": null,
+    "source": "https://ai.google.dev/gemini-api/docs/pricing",
+    "note": "GA 2026-07; press/OpenRouter report $1.50/$7.50 (output CHEAPER than 3.5 Flash's $9) \u2014 hand-verify against the Google pricing page before recompute, per policy. Output presumably includes thinking tokens like the rest of the family."
+  },
+  "gemini-3.5-flash-lite": {
+    "input_per_1m": 0.3,
+    "output_per_1m": 2.5,
+    "source": "https://ai.google.dev/gemini-api/docs/pricing \u2014 paid tier, fetched from the official Google docs page 2026-07-27",
+    "note": "VERIFIED against the vendor page (previously null/press-reported). Batch API = 50% discount per the same page: input $0.15, output $1.25 per 1M. Gemini bills thinking tokens as OUTPUT \u2014 api_describers counts candidates + thoughts, so output_tokens already includes them."
+  }
+}

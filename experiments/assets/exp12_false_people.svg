@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" font-family="system-ui,sans-serif">
+<rect width="760" height="360" fill="white"/>
+<text x="380.0" y="30" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1a2e">False people on things that are not people</text>
+<text x="380.0" y="51" text-anchor="middle" font-size="12.5" fill="#7a7a8c">lower is better · object set = 259 hand-verified doll/statue/toy images · PASS = 3,000 verified-empty scenes</text>
+<rect x="80" y="66" width="14" height="14" rx="2" fill="#9aa0a6"/>
+<text x="100" y="77" font-size="11.5" fill="#1a1a2e">production YOLO-MIT v9 (8.2M params)</text>
+<rect x="360" y="66" width="14" height="14" rx="2" fill="#0f9d8f"/>
+<text x="380" y="77" font-size="11.5" fill="#1a1a2e">YOLO26n + Spotlight labels (2.4M params)</text>
+<rect x="100" y="207.97" width="42" height="102.03" rx="3" fill="#9aa0a6"/>
+<text x="121.0" y="201.97" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1a2e">53.7</text>
+<rect x="156" y="285.87" width="42" height="24.13" rx="3" fill="#0f9d8f"/>
+<text x="177.0" y="279.87" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1a2e">12.7</text>
+<text x="149.0" y="328" text-anchor="middle" font-size="11.5" fill="#1a1a2e">object set:</text>
+<text x="149.0" y="342" text-anchor="middle" font-size="11.5" fill="#1a1a2e">% images w/ false person</text>
+<text x="149.0" y="356" text-anchor="middle" font-size="11" font-weight="700" fill="#0f9d8f">✓ new model</text>
+<rect x="284" y="139.76000000000002" width="42" height="170.23999999999998" rx="3" fill="#9aa0a6"/>
+<text x="305.0" y="133.76000000000002" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1a2e">89.6</text>
+<rect x="340" y="264.59000000000003" width="42" height="45.41" rx="3" fill="#0f9d8f"/>
+<text x="361.0" y="258.59000000000003" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1a2e">23.9</text>
+<text x="333.0" y="328" text-anchor="middle" font-size="11.5" fill="#1a1a2e">object set:</text>
+<text x="333.0" y="342" text-anchor="middle" font-size="11.5" fill="#1a1a2e">FPs per 100 images</text>
+<text x="333.0" y="356" text-anchor="middle" font-size="11" font-weight="700" fill="#0f9d8f">✓ new model</text>
+<rect x="468" y="307.283" width="42" height="2.717" rx="3" fill="#9aa0a6"/>
+<text x="489.0" y="301.283" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1a2e">1.4</text>
+<rect x="524" y="309.563" width="42" height="0.437" rx="3" fill="#0f9d8f"/>
+<text x="545.0" y="303.563" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1a2e">0.2</text>
+<text x="517.0" y="328" text-anchor="middle" font-size="11.5" fill="#1a1a2e">PASS:</text>
+<text x="517.0" y="342" text-anchor="middle" font-size="11.5" fill="#1a1a2e">FPs per 100 images</text>
+<text x="517.0" y="356" text-anchor="middle" font-size="11" font-weight="700" fill="#0f9d8f">✓ new model</text>
+</svg>

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 470" font-family="system-ui,sans-serif">
+<rect width="780" height="470" fill="white"/>
+<text x="390.0" y="30" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1d25">Accuracy at each "child" cutoff</text>
+<text x="390.0" y="50" text-anchor="middle" font-size="12" fill="#8899aa">Only these 3 cutoffs are measurable (the model reports age in bands). Catching real kids stays ~98%+ everywhere.</text>
+<line x1="72" y1="384.0" x2="708" y2="384.0" stroke="#dfe3ea"/>
+<text x="64" y="388.0" text-anchor="end" font-size="11" fill="#8899aa">0%</text>
+<line x1="72" y1="311.0" x2="708" y2="311.0" stroke="#dfe3ea"/>
+<text x="64" y="315.0" text-anchor="end" font-size="11" fill="#8899aa">25%</text>
+<line x1="72" y1="238.0" x2="708" y2="238.0" stroke="#dfe3ea"/>
+<text x="64" y="242.0" text-anchor="end" font-size="11" fill="#8899aa">50%</text>
+<line x1="72" y1="165.0" x2="708" y2="165.0" stroke="#dfe3ea"/>
+<text x="64" y="169.0" text-anchor="end" font-size="11" fill="#8899aa">75%</text>
+<line x1="72" y1="92.0" x2="708" y2="92.0" stroke="#dfe3ea"/>
+<text x="64" y="96.0" text-anchor="end" font-size="11" fill="#8899aa">100%</text>
+<rect x="101.0" y="145.4" width="46.6" height="238.6" rx="2" fill="#1a1d25"/>
+<text x="124.4" y="140.4" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1a1d25">82</text>
+<rect x="154.7" y="92.3" width="46.6" height="291.7" rx="2" fill="#27ae60"/>
+<text x="178.0" y="87.3" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1a1d25">100</text>
+<rect x="208.3" y="156.8" width="46.6" height="227.2" rx="2" fill="#4f8ef7"/>
+<text x="231.6" y="151.8" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1a1d25">78</text>
+<text x="178.0" y="402.0" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1d25">under 10</text>
+<text x="178.0" y="418.0" text-anchor="middle" font-size="10.5" fill="#8899aa">child = 9 and under</text>
+<rect x="313.0" y="131.7" width="46.6" height="252.3" rx="2" fill="#1a1d25"/>
+<text x="336.4" y="126.7" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1a1d25">86</text>
+<rect x="366.7" y="93.2" width="46.6" height="290.8" rx="2" fill="#27ae60"/>
+<text x="390.0" y="88.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1a1d25">100</text>
+<rect x="420.3" y="144.0" width="46.6" height="240.0" rx="2" fill="#4f8ef7"/>
+<text x="443.6" y="139.0" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1a1d25">82</text>
+<text x="390.0" y="402.0" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1d25">puberty</text>
+<text x="390.0" y="418.0" text-anchor="middle" font-size="10.5" fill="#8899aa">child = 12 and under</text>
+<rect x="525.0" y="123.2" width="46.6" height="260.8" rx="2" fill="#1a1d25"/>
+<text x="548.4" y="118.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1a1d25">89</text>
+<rect x="578.7" y="98.4" width="46.6" height="285.6" rx="2" fill="#27ae60"/>
+<text x="602.0" y="93.4" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1a1d25">98</text>
+<rect x="632.3" y="140.2" width="46.6" height="243.8" rx="2" fill="#4f8ef7"/>
+<text x="655.6" y="135.2" text-anchor="middle" font-size="10.5" font-weight="700" fill="#1a1d25">84</text>
+<text x="602.0" y="402.0" text-anchor="middle" font-size="13" font-weight="700" fill="#1a1d25">minor</text>
+<text x="602.0" y="418.0" text-anchor="middle" font-size="10.5" fill="#8899aa">child = 17 and under</text>
+<rect x="72" y="446" width="12" height="12" rx="2" fill="#1a1d25"/><text x="88" y="456" font-size="11" fill="#8899aa">overall accuracy</text>
+<rect x="257" y="446" width="12" height="12" rx="2" fill="#27ae60"/><text x="273" y="456" font-size="11" fill="#8899aa">catch real kids</text>
+<rect x="442" y="446" width="12" height="12" rx="2" fill="#4f8ef7"/><text x="458" y="456" font-size="11" fill="#8899aa">catch real adults</text>
+</svg>

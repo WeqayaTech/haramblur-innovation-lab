@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 518" font-family="system-ui,sans-serif">
+<rect width="560" height="518" fill="white"/>
+<text x="280.0" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1d25">Age confusion matrix (4-class)</text>
+<text x="280.0" y="50" text-anchor="middle" font-size="12.5" fill="#8899aa">Teens are overwhelmingly predicted 'child' (68%); seniors often 'adult' (58%). Excludes abstentions. n=4,966</text>
+<text x="316.0" y="80" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25">VLM predicted →</text>
+<text x="184.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">child</text>
+<text x="272.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">teen</text>
+<text x="360.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">adult</text>
+<text x="448.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">senior</text>
+<text x="130" y="144.0" text-anchor="end" font-size="12" fill="#1a1d25">child</text>
+<rect x="140" y="96" width="84" height="84" rx="4" fill="#27ae60" fill-opacity="0.95" stroke="#dfe3ea"/>
+<text x="182.0" y="136.0" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">1194</text>
+<text x="182.0" y="152.0" text-anchor="middle" font-size="10.5" fill="#ffffff">100%</text>
+<rect x="228" y="96" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.12" stroke="#dfe3ea"/>
+<text x="270.0" y="136.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">4</text>
+<text x="270.0" y="152.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">0%</text>
+<rect x="316" y="96" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.12" stroke="#dfe3ea"/>
+<text x="358.0" y="136.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">1</text>
+<text x="358.0" y="152.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">0%</text>
+<rect x="404" y="96" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.12" stroke="#dfe3ea"/>
+<text x="446.0" y="136.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">0</text>
+<text x="446.0" y="152.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">0%</text>
+<text x="130" y="232.0" text-anchor="end" font-size="12" fill="#1a1d25">teen</text>
+<rect x="140" y="184" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.69" stroke="#dfe3ea"/>
+<text x="182.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">543</text>
+<text x="182.0" y="240.0" text-anchor="middle" font-size="10.5" fill="#ffffff">68%</text>
+<rect x="228" y="184" width="84" height="84" rx="4" fill="#27ae60" fill-opacity="0.34" stroke="#dfe3ea"/>
+<text x="270.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">209</text>
+<text x="270.0" y="240.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">26%</text>
+<rect x="316" y="184" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.16" stroke="#dfe3ea"/>
+<text x="358.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">43</text>
+<text x="358.0" y="240.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">5%</text>
+<rect x="404" y="184" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.12" stroke="#dfe3ea"/>
+<text x="446.0" y="224.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">0</text>
+<text x="446.0" y="240.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">0%</text>
+<text x="130" y="320.0" text-anchor="end" font-size="12" fill="#1a1d25">adult</text>
+<rect x="140" y="272" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.16" stroke="#dfe3ea"/>
+<text x="182.0" y="312.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">124</text>
+<text x="182.0" y="328.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">5%</text>
+<rect x="228" y="272" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.24" stroke="#dfe3ea"/>
+<text x="270.0" y="312.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">363</text>
+<text x="270.0" y="328.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">14%</text>
+<rect x="316" y="272" width="84" height="84" rx="4" fill="#27ae60" fill-opacity="0.78" stroke="#dfe3ea"/>
+<text x="358.0" y="312.0" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">2060</text>
+<text x="358.0" y="328.0" text-anchor="middle" font-size="10.5" fill="#ffffff">80%</text>
+<rect x="404" y="272" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.13" stroke="#dfe3ea"/>
+<text x="446.0" y="312.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">25</text>
+<text x="446.0" y="328.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">1%</text>
+<text x="130" y="408.0" text-anchor="end" font-size="12" fill="#1a1d25">senior</text>
+<rect x="140" y="360" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.12" stroke="#dfe3ea"/>
+<text x="182.0" y="400.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">2</text>
+<text x="182.0" y="416.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">0%</text>
+<rect x="228" y="360" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.12" stroke="#dfe3ea"/>
+<text x="270.0" y="400.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">0</text>
+<text x="270.0" y="416.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">0%</text>
+<rect x="316" y="360" width="84" height="84" rx="4" fill="#e74c3c" fill-opacity="0.61" stroke="#dfe3ea"/>
+<text x="358.0" y="400.0" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">234</text>
+<text x="358.0" y="416.0" text-anchor="middle" font-size="10.5" fill="#ffffff">58%</text>
+<rect x="404" y="360" width="84" height="84" rx="4" fill="#27ae60" fill-opacity="0.46" stroke="#dfe3ea"/>
+<text x="446.0" y="400.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">164</text>
+<text x="446.0" y="416.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">41%</text>
+<text x="14" y="272.0" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25" transform="rotate(-90 14 272.0)">Ground truth →</text>
+<text x="140" y="482" font-size="11" fill="#8899aa">Green = correct (diagonal) · Red = error · shade = share of that GT row · % is row-normalized</text>
+</svg>

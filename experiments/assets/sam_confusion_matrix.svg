@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 466" font-family="system-ui,sans-serif">
+<rect width="680" height="466" fill="white"/>
+<text x="340.0" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1d25">SAM3 auto-labeler: 3-class confusion matrix</text>
+<text x="340.0" y="50" text-anchor="middle" font-size="12.5" fill="#8899aa">Gender swaps (Woman↔Man) are only 1.2% — nearly all error is adults labeled Child. n=4,936</text>
+<text x="300.0" y="80" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25">SAM3 predicted →</text>
+<text x="200.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">Woman</text>
+<text x="300.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">Man</text>
+<text x="400.0" y="90" text-anchor="middle" font-size="12" fill="#1a1d25">Child</text>
+<text x="140" y="150.0" text-anchor="end" font-size="12" fill="#1a1d25">Woman</text>
+<rect x="150" y="96" width="96" height="96" rx="4" fill="#27ae60" fill-opacity="0.83" stroke="#dfe3ea"/>
+<text x="198.0" y="142.0" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">1647</text>
+<text x="198.0" y="158.0" text-anchor="middle" font-size="10.5" fill="#ffffff">86%</text>
+<rect x="250" y="96" width="96" height="96" rx="4" fill="#e74c3c" fill-opacity="0.13" stroke="#dfe3ea"/>
+<text x="298.0" y="142.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">21</text>
+<text x="298.0" y="158.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">1%</text>
+<rect x="350" y="96" width="96" height="96" rx="4" fill="#e74c3c" fill-opacity="0.23" stroke="#dfe3ea"/>
+<text x="398.0" y="142.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">252</text>
+<text x="398.0" y="158.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">13%</text>
+<text x="140" y="250.0" text-anchor="end" font-size="12" fill="#1a1d25">Man</text>
+<rect x="150" y="196" width="96" height="96" rx="4" fill="#e74c3c" fill-opacity="0.13" stroke="#dfe3ea"/>
+<text x="198.0" y="242.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">17</text>
+<text x="198.0" y="258.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">1%</text>
+<rect x="250" y="196" width="96" height="96" rx="4" fill="#27ae60" fill-opacity="0.83" stroke="#dfe3ea"/>
+<text x="298.0" y="242.0" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">1566</text>
+<text x="298.0" y="258.0" text-anchor="middle" font-size="10.5" fill="#ffffff">86%</text>
+<rect x="350" y="196" width="96" height="96" rx="4" fill="#e74c3c" fill-opacity="0.23" stroke="#dfe3ea"/>
+<text x="398.0" y="242.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">246</text>
+<text x="398.0" y="258.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">13%</text>
+<text x="140" y="350.0" text-anchor="end" font-size="12" fill="#1a1d25">Child</text>
+<rect x="150" y="296" width="96" height="96" rx="4" fill="#e74c3c" fill-opacity="0.13" stroke="#dfe3ea"/>
+<text x="198.0" y="342.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">13</text>
+<text x="198.0" y="358.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">1%</text>
+<rect x="250" y="296" width="96" height="96" rx="4" fill="#e74c3c" fill-opacity="0.13" stroke="#dfe3ea"/>
+<text x="298.0" y="342.0" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1d25">10</text>
+<text x="298.0" y="358.0" text-anchor="middle" font-size="10.5" fill="#1a1d25">1%</text>
+<rect x="350" y="296" width="96" height="96" rx="4" fill="#27ae60" fill-opacity="0.93" stroke="#dfe3ea"/>
+<text x="398.0" y="342.0" text-anchor="middle" font-size="15" font-weight="700" fill="#ffffff">1164</text>
+<text x="398.0" y="358.0" text-anchor="middle" font-size="10.5" fill="#ffffff">98%</text>
+<text x="14" y="246.0" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1d25" transform="rotate(-90 14 246.0)">Ground truth →</text>
+<text x="150" y="430" font-size="11" fill="#8899aa">Green = correct (diagonal) · Red = error · shade = share of that GT row · % is row-normalized</text>
+</svg>

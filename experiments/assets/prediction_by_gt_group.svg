@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 440" font-family="system-ui,sans-serif">
+<rect width="920" height="440" fill="white"/>
+<text x="460.0" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#1a1d25">What did the VLM predict for each TRUE age group?</text>
+<text x="460.0" y="52" text-anchor="middle" font-size="12.5" fill="#8899aa">Our cutoff: Child = under 13 (pre-puberty); everyone 13+ should be Adult.</text>
+<text x="460.0" y="70" text-anchor="middle" font-size="12.5" fill="#8899aa">Bar = how the VLM split that group.  Green = matched GT · Red = VLM wrong.</text>
+<text x="294" y="141.0" text-anchor="end" font-size="14" font-weight="700" fill="#1a1d25">Children</text>
+<text x="294" y="159.0" text-anchor="end" font-size="11" fill="#8899aa">age 0–12 · should be Child</text>
+<rect x="310" y="118" width="517.9" height="54" fill="#27ae60"/>
+<text x="569.0" y="142.0" text-anchor="middle" font-size="12" font-weight="700" fill="white">VLM: Child</text>
+<text x="569.0" y="158.0" text-anchor="middle" font-size="11" fill="white">100%</text>
+<rect x="827.9" y="118" width="2.1" height="54" fill="#e74c3c"/>
+<text x="840" y="149.0" font-size="10.5" fill="#8899aa">n=1199</text>
+<text x="294" y="227.0" text-anchor="end" font-size="14" font-weight="700" fill="#1a1d25">Teens</text>
+<text x="294" y="245.0" text-anchor="end" font-size="11" fill="#8899aa">age 13–17 · should be Adult</text>
+<rect x="310" y="204" width="355.2" height="54" fill="#e74c3c"/>
+<text x="487.6" y="228.0" text-anchor="middle" font-size="12" font-weight="700" fill="white">VLM: Child</text>
+<text x="487.6" y="244.0" text-anchor="middle" font-size="11" fill="white">68%</text>
+<rect x="665.2" y="204" width="164.8" height="54" fill="#27ae60"/>
+<text x="747.6" y="228.0" text-anchor="middle" font-size="12" font-weight="700" fill="white">VLM: Adult</text>
+<text x="747.6" y="244.0" text-anchor="middle" font-size="11" fill="white">32%</text>
+<text x="840" y="235.0" font-size="10.5" fill="#8899aa">n=795</text>
+<text x="294" y="313.0" text-anchor="end" font-size="14" font-weight="700" fill="#1a1d25">Adults</text>
+<text x="294" y="331.0" text-anchor="end" font-size="11" fill="#8899aa">age 18–64 · should be Adult</text>
+<rect x="310" y="290" width="25.0" height="54" fill="#e74c3c"/>
+<rect x="335.0" y="290" width="495.0" height="54" fill="#27ae60"/>
+<text x="582.5" y="314.0" text-anchor="middle" font-size="12" font-weight="700" fill="white">VLM: Adult</text>
+<text x="582.5" y="330.0" text-anchor="middle" font-size="11" fill="white">95%</text>
+<text x="840" y="321.0" font-size="10.5" fill="#8899aa">n=2572</text>
+<text x="294" y="399.0" text-anchor="end" font-size="14" font-weight="700" fill="#1a1d25">Seniors</text>
+<text x="294" y="417.0" text-anchor="end" font-size="11" fill="#8899aa">age 65+ · should be Adult</text>
+<rect x="310" y="376" width="2.6" height="54" fill="#e74c3c"/>
+<rect x="312.6" y="376" width="517.4" height="54" fill="#27ae60"/>
+<text x="571.3" y="400.0" text-anchor="middle" font-size="12" font-weight="700" fill="white">VLM: Adult</text>
+<text x="571.3" y="416.0" text-anchor="middle" font-size="11" fill="white">100%</text>
+<text x="840" y="407.0" font-size="10.5" fill="#8899aa">n=400</text>
+<circle cx="316" cy="274" r="4" fill="#e74c3c"/>
+<text x="326" y="278" font-size="11.5" font-weight="700" fill="#e74c3c">68% of teens (GT = Adult) were predicted Child — this is the main failure (your age-15 case).</text>
+</svg>

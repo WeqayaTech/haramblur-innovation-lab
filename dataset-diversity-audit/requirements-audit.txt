@@ -1,0 +1,10 @@
+# Core (always required)
+numpy>=1.24
+opencv-python>=4.8
+PyYAML>=6.0
+matplotlib>=3.7
+
+# Optional: only needed for the view-angle & dress-code dimensions (--no-clip skips them)
+# The POD already has torch from training; install open_clip on top.
+open_clip_torch>=2.24
+Pillow>=10.0

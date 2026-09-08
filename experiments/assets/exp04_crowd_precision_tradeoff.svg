@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 480" font-family="system-ui,sans-serif">
+<rect width="900" height="480" fill="white"/>
+<text x="450.0" y="30" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1d25">The crowd trade: a small recall gain bought with a precision loss</text>
+<text x="450.0" y="51" text-anchor="middle" font-size="12.5" fill="#8899aa">CrowdHuman, same matching (IoU 0.5, visible boxes, ignore regions excluded). Duplicates stay negligible.</text>
+<line x1="64" y1="380.0" x2="860" y2="380.0" stroke="#dfe3ea"/>
+<text x="56" y="384.0" text-anchor="end" font-size="11" fill="#8899aa">0%</text>
+<line x1="64" y1="305.5" x2="860" y2="305.5" stroke="#dfe3ea"/>
+<text x="56" y="309.5" text-anchor="end" font-size="11" fill="#8899aa">25%</text>
+<line x1="64" y1="231.0" x2="860" y2="231.0" stroke="#dfe3ea"/>
+<text x="56" y="235.0" text-anchor="end" font-size="11" fill="#8899aa">50%</text>
+<line x1="64" y1="156.5" x2="860" y2="156.5" stroke="#dfe3ea"/>
+<text x="56" y="160.5" text-anchor="end" font-size="11" fill="#8899aa">75%</text>
+<line x1="64" y1="82.0" x2="860" y2="82.0" stroke="#dfe3ea"/>
+<text x="56" y="86.0" text-anchor="end" font-size="11" fill="#8899aa">100%</text>
+<rect x="127.7" y="133.6" width="64.0" height="246.4" rx="3" fill="#9aa7b5"/>
+<text x="159.7" y="127.6" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">82.7%</text>
+<rect x="201.7" y="127.6" width="64.0" height="252.4" rx="3" fill="#8e44ad"/>
+<text x="233.7" y="121.6" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">84.7%</text>
+<text x="196.7" y="397.0" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1a1d25">Recall (light occl.)</text>
+<text x="196.7" y="412.0" text-anchor="middle" font-size="10" fill="#8899aa">bar: 90%</text>
+<rect x="393.0" y="121.9" width="64.0" height="258.1" rx="3" fill="#9aa7b5"/>
+<text x="425.0" y="115.9" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">86.6%</text>
+<rect x="467.0" y="128.8" width="64.0" height="251.2" rx="3" fill="#8e44ad"/>
+<text x="499.0" y="122.8" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">84.3%</text>
+<text x="462.0" y="397.0" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1a1d25">Detection precision</text>
+<text x="462.0" y="412.0" text-anchor="middle" font-size="10" fill="#8899aa">bar: 85% — person prompt slips under</text>
+<rect x="658.3" y="376.7" width="64.0" height="3.3" rx="3" fill="#9aa7b5"/>
+<text x="690.3" y="370.7" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">1.1%</text>
+<rect x="732.3" y="376.7" width="64.0" height="3.3" rx="3" fill="#8e44ad"/>
+<text x="764.3" y="370.7" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1d25">1.1%</text>
+<text x="727.3" y="397.0" text-anchor="middle" font-size="11.5" font-weight="600" fill="#1a1d25">Duplicates / matched</text>
+<text x="727.3" y="412.0" text-anchor="middle" font-size="10" fill="#8899aa">bar: under 5%</text>
+<line x1="334" y1="126.7" x2="610" y2="126.7" stroke="#e74c3c" stroke-width="2" stroke-dasharray="6 4"/>
+<rect x="64" y="446" width="14" height="14" rx="2" fill="#9aa7b5"/>
+<text x="84" y="457" font-size="11.5" fill="#1a1d25">production 3 prompts (woman/man/child)</text>
+<rect x="334" y="446" width="14" height="14" rx="2" fill="#8e44ad"/>
+<text x="354" y="457" font-size="11.5" fill="#1a1d25">single &quot;person&quot; prompt</text>
+</svg>

@@ -1,0 +1,43 @@
+# secrets
+.env
+
+# local runtime state
+.serve.pid
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# local-only volume mount / mirrors of pod output (reproducible from the pod, not source)
+mnt/
+workspace/
+_*_review/
+deliverables/
+models/
+runpod_volume/__pycache__/
+
+# archives and model weight binaries
+*.zip
+*.tar.gz
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.tflite
+*.safetensors
+*.h5
+
+# generated report exports — the .md write-up is the source of truth
+*.pdf
+*.docx
+*.html
+
+# personal notes, not project docs
+RESUME_CONTEXT_haramblur.md
+RESUME_UPDATES_2026-08.md
+
+# stray backup from the CLAUDE.md restructure — keep locally, not in git
+CLAUDE.md.pre-refactor-*.bak.md
+
+# python / OS junk
+__pycache__/
+*.pyc
+.DS_Store

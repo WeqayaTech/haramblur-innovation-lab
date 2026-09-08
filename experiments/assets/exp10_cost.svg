@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 470" font-family="system-ui,sans-serif">
+<rect width="940" height="470" fill="white"/>
+<text x="470.0" y="30" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1d25">Cost to label 500,000 images</text>
+<text x="470.0" y="51" text-anchor="middle" font-size="12.5" fill="#8899aa">Measured: ~$1.00 per 1,000 people labeled (1,838 input + 178 output tokens each). Cost scales with PEOPLE, not images.</text>
+<line x1="200.0" y1="89" x2="200.0" y2="336" stroke="#dfe3ea"/>
+<text x="200.0" y="352.0" text-anchor="middle" font-size="11" fill="#8899aa">$0</text>
+<line x1="329.6" y1="89" x2="329.6" y2="336" stroke="#dfe3ea"/>
+<text x="329.6" y="352.0" text-anchor="middle" font-size="11" fill="#8899aa">$2,500</text>
+<line x1="459.3" y1="89" x2="459.3" y2="336" stroke="#dfe3ea"/>
+<text x="459.3" y="352.0" text-anchor="middle" font-size="11" fill="#8899aa">$5,000</text>
+<line x1="588.9" y1="89" x2="588.9" y2="336" stroke="#dfe3ea"/>
+<text x="588.9" y="352.0" text-anchor="middle" font-size="11" fill="#8899aa">$7,500</text>
+<line x1="718.5" y1="89" x2="718.5" y2="336" stroke="#dfe3ea"/>
+<text x="718.5" y="352.0" text-anchor="middle" font-size="11" fill="#8899aa">$10,000</text>
+<line x1="848.1" y1="89" x2="848.1" y2="336" stroke="#dfe3ea"/>
+<text x="848.1" y="352.0" text-anchor="middle" font-size="11" fill="#8899aa">$12,500</text>
+<rect x="200" y="95.0" width="64.6" height="34" rx="3" fill="#9aa7b5"/>
+<rect x="200" y="133.0" width="32.3" height="34" rx="3" fill="#27ae60"/>
+<text x="272.6" y="118.0" font-size="12.5" font-weight="700" fill="#1a1d25">$1,245</text>
+<text x="240.3" y="156.0" font-size="12.5" font-weight="700" fill="#27ae60">$622 (batch)</text>
+<text x="190" y="117.0" text-anchor="end" font-size="12" font-weight="600" fill="#1a1d25">Ordinary photos</text>
+<text x="190" y="133.0" text-anchor="end" font-size="10" fill="#8899aa">~2.5 people/image = 1.25M</text>
+<rect x="200" y="173.0" width="167.8" height="34" rx="3" fill="#9aa7b5"/>
+<rect x="200" y="211.0" width="83.9" height="34" rx="3" fill="#27ae60"/>
+<text x="375.8" y="196.0" font-size="12.5" font-weight="700" fill="#1a1d25">$3,237</text>
+<text x="291.9" y="234.0" font-size="12.5" font-weight="700" fill="#27ae60">$1,618 (batch)</text>
+<text x="190" y="195.0" text-anchor="end" font-size="12" font-weight="600" fill="#1a1d25">Multi-person photos</text>
+<text x="190" y="211.0" text-anchor="end" font-size="10" fill="#8899aa">~6.5 people/image = 3.25M</text>
+<rect x="200" y="251.0" width="671.5" height="34" rx="3" fill="#9aa7b5"/>
+<rect x="200" y="289.0" width="335.7" height="34" rx="3" fill="#27ae60"/>
+<text x="879.5" y="274.0" font-size="12.5" font-weight="700" fill="#1a1d25">$12,950</text>
+<text x="543.7" y="312.0" font-size="12.5" font-weight="700" fill="#27ae60">$6,475 (batch)</text>
+<text x="190" y="273.0" text-anchor="end" font-size="12" font-weight="600" fill="#1a1d25">Crowd-heavy</text>
+<text x="190" y="289.0" text-anchor="end" font-size="10" fill="#8899aa">~26 people/image = 13M</text>
+<text x="200" y="412" font-size="12" fill="#1a1d25">For comparison: human annotation of the same 500k images &#8776; <tspan font-weight="700">$175,000</tspan>. This validation experiment cost <tspan font-weight="700">$5.50</tspan>.</text>
+<text x="200" y="432" font-size="11.5" fill="#8899aa">Dollar figures use press-reported Flash-Lite rates ($0.30/$2.50 per 1M tokens) — token counts are measured, rates await vendor confirmation.</text>
+</svg>
