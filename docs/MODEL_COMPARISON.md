@@ -761,6 +761,15 @@ source crops from LAGENDA `fl1199`, held out from the `smallperson_v1` benchmark
 late as **epoch 90/100** (`mAP50-95` 0.68→0.804 val). Weights:
 `/workspace/exp20/train/y26s_humanshaped_smallpatch_v1/weights/best.pt` (20.3 MB).
 
+**⚠️ CORRECTION (2026-09-09): the LAGENDA v2 column below is INVALID as a cross-model
+comparison** — the two humanshaped models were scored on a different (smaller, corrected)
+LAGENDA image set than every other model in this table, which alone explains most of the
+apparent LAGENDA lead. See "LAGENDA benchmark-set mismatch found + corrected" near the end of
+this document for the root cause and the full corrected table (every model gains ~10-13 mAP50
+points once matched fairly, and the humanshaped models are no longer LAGENDA leaders). Every
+OTHER column in the table below (Spotval, crowd, PASS, object_set) is unaffected — this bug was
+specific to the LAGENDA dump.
+
 **Standard 5-dataset comparison** (conf 0.45 unless noted; `object_set` FP/100 uses the OLD
 pre-humanshaped ground truth, see caveat below):
 
@@ -900,3 +909,265 @@ ship at 0.45 in production, while the gelan pair's own best operating point is m
 (documented median matched-confidence ~0.42, see the small-person work above), so gelan's numbers
 here are worse than its capability ceiling, not a clean apples-to-apples calibration comparison.
 Raw ship-table log: `_spotlight_review/y26s_humanshaped_smallpatch_v1_benchmark/pixel_metrics/`.
+
+## TFLite export size & CPU latency — fp32 vs INT8 (2026-09-08)
+
+Two YOLO26n candidates for an export decision: **`y26n_humanshaped_v2`** (the newest
+*complete* checkpoint under the current humanshaped-labeling policy,
+`/workspace/exp20/train/y26n_humanshaped_v2/weights/best.pt`) and **`y26n_noe2e_warm50-2`**
+(the pre-humanshaped-policy holdout mAP champion, `/workspace/exp18/train/y26n_noe2e_warm50-2/
+weights/best.pt`). The two *newer* exp20 checkpoints (`y26n_humanshaped_smallpatch_v1`,
+`y26n_humanshaped_v2_distill_v1`) were ruled out first: both stalled at epoch 2-3/100 when their
+training pod was torn down mid-run and are not real candidates.
+
+Both exported to `.tflite` with `yolo export format=tflite int8=True imgsz={640,416,320}
+data=/workspace/exp12/spotlight_oiv7.yaml device=cpu` (INT8 calibrated on real Open Images v7 val
+images, dynamic-range: float32 I/O, int8 weights), Ultralytics 8.4.144. `y26n_humanshaped_v2`'s
+bundle already existed from a 2026-09-02 session; `y26n_noe2e_warm50-2` had no INT8 export
+before this session — that gap is what this pass filled. Full bundles + READMEs + SHA256SUMS:
+`models/humanshaped_v2_20260902/`, `models/noe2e_warm50-2_20260908/` (local repo, gitignored
+binaries, reproducible from the pod paths above).
+
+**Known export bug**: `y26n_noe2e_warm50-2`'s first `int8=True imgsz=640` attempt failed with
+`AttributeError: '_OpNamespace' 'aten' object has no attribute 'cholesky'` (torch/onnx2tf gap);
+an identical retry succeeded with no code change. Treat as transient, but budget one retry.
+
+Latency measured with `vlm-cluster/bench_tflite.py` (`ai_edge_litert.Interpreter`, 4 threads, 20
+warmup + 100 runs, median/p90) — **a different runtime AND different CPU from the ONNX/EPYC-9254
+numbers in the "Size & speed" section above; do not cross-compare the two tables.**
+
+| model | size | fp32 size | fp32 median / p90 | int8 size | int8 median / p90 |
+|---|---|---|---|---|---|
+| `y26n_humanshaped_v2` | 640 | 9.84 MB | 21.3 ms / 25.7 ms | 2.89 MB | 27.6 ms / 33.6 ms |
+| `y26n_humanshaped_v2` | 416 | 9.78 MB | 9.5 ms / 10.3 ms | 2.87 MB | 9.7 ms / 10.1 ms |
+| `y26n_humanshaped_v2` | 320 | 9.76 MB | 6.0 ms / 6.4 ms | 2.87 MB | **5.5 ms** / 5.9 ms |
+| `y26n_noe2e_warm50-2` | 640 | 9.84 MB | **20.5 ms** / 24.5 ms | 2.89 MB | 27.3 ms / 27.6 ms |
+| `y26n_noe2e_warm50-2` | 416 | 9.78 MB | 9.4 ms / 9.9 ms | 2.87 MB | 9.3 ms / 10.7 ms |
+| `y26n_noe2e_warm50-2` | 320 | 9.76 MB | 6.1 ms / 6.8 ms | 2.87 MB | **5.6 ms** / 6.0 ms |
+
+The two checkpoints are latency-twins (same architecture family, as expected). **The finding
+that matters for the export decision: INT8 is not a free speedup.** It is a consistent ~3.4x
+size reduction at every resolution, but at 640px it is ~30% *slower* than fp32 (dynamic-range
+quantization's dequant overhead isn't hidden by XNNPACK at that resolution); at 416px it's a
+wash; only at 320px does int8 edge out fp32 on speed. Size and speed are two separate levers
+here — resolution (not precision) is the dominant speed lever.
+
+## Threshold sweep — CrowdHuman recall/precision, PASS false positives (2026-09-08)
+
+Offline confidence-threshold sweep via `vlm-cluster/conf_sweep.py` (replays already-dumped
+floor-0.001 raw sidecars, no re-run) for the same two checkpoints, global (shared) threshold,
+grid `0.05:0.95:0.01`, objective `@crowd_f1`. **CrowdHuman arm** (`--crowd`, exhaustively-boxed
+GT, `annotation_val.odgt`, 4,372 images / 99,481 GT persons) gives real recall AND precision
+directly; **PASS arm** (`--negatives pass:`, 3,000 person-free images) gives the false-persons
+rate. Sidecars reused from existing dumps: `/workspace/mapdump/y26n_humanshaped_v2/{crowd,pass}/
+raw`, `/workspace/exp_lagenda_bench/y26n_noe2e_warm50-2/{crowd,pass}/raw`.
+
+| model | threshold | recall | precision | PASS img-FP rate |
+|---|---|---|---|---|
+| `y26n_humanshaped_v2` | 0.45 (current) | 0.390 | 0.922 | 0.47% |
+| `y26n_humanshaped_v2` | 0.18 (best F1) | 0.580 | 0.718 | 2.43% |
+| `y26n_noe2e_warm50-2` | 0.45 (current) | 0.387 | 0.920 | 0.37% |
+| `y26n_noe2e_warm50-2` | 0.19 (best F1) | 0.567 | 0.731 | 2.10% |
+
+**The two models are statistically near-identical on this sweep** — same recall/precision curve
+shape, same trade at the same thresholds, well within run-to-run noise for a single-run number.
+Lowering the threshold from 0.45 to ~0.18-0.19 buys +18-19 recall points at a cost of -19-20
+precision points and a ~5x rise in PASS false-persons — a real trade, not a free lunch; this
+sweep does not by itself recommend moving off 0.45. Full sweep tables (every threshold from 0.05
+to 0.95), SVG charts, and self-contained HTML reports: `models/threshold_sweep_20260908/
+{y26n_humanshaped_v2,y26n_noe2e_warm50-2}/` (local repo).
+
+**Net read on the export decision**: these two checkpoints don't differentiate on latency, export
+size, or the recall/precision/FP curve — the decision between them should rest on the
+classification-accuracy numbers already in this document (holdout mAP, LAGENDA/CrowdHuman/PASS
+above), not on export mechanics.
+
+## LAGENDA classification sweep — recall & precision per class, IoU>=0.5 (2026-09-08)
+
+The CrowdHuman/PASS sweep above answers "did you find a person"; this one answers "did you get
+the *class* right" — the metric that actually matters for a gaze-lowering blur (an adult found
+but mislabeled still escapes the blur). Same tool (`vlm-cluster/conf_sweep.py`), same two
+checkpoints, but the `--lagenda` arm against LAGENDA v2's human-labeled ground truth
+(`/workspace/datasets/lagenda_full/eval_v2/{gt.jsonl,labels}`, 4,601 images / 7,098 human
+age+gender-labeled people), `--match-iou 0.5`, **0.05 grid increments** (0.05 to 0.95, 19
+points, as requested — finer than the 0.01 grid used for the CrowdHuman sweep above). Sidecars
+reused from the same floor-0.001 dumps as before: `/workspace/mapdump/y26n_humanshaped_v2/
+lagenda/raw`, `/workspace/exp_lagenda_bench/y26n_noe2e_warm50-2/lagenda/raw`.
+
+Columns: `det_recall` = labeled people found at all; `acc3` = 3-class accuracy on matched
+people (the direct "did you classify correctly" number); `gender_acc` = Woman/Man accuracy on
+matched adults; `W/M/C_recall` = **recall_e2e**, GT people of that class found AND written the
+right label (an unmatched or mislabeled person counts against this); `W/M/C_prec` =
+**precision_matched**, of matches the model wrote as that class, how many really are (LAGENDA is
+label-anchored, so this is a matched-only proxy, not a true FP-based precision — see the
+CrowdHuman/PASS sweep above for that); `leak` = matched GT age>=20 written 'Child' (adults
+escaping the blur).
+
+**`y26n_humanshaped_v2`:**
+
+| thr | det_recall | acc3 | gender_acc | W_recall | W_prec | M_recall | M_prec | C_recall | C_prec | leak |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0.05 | 0.995 | 0.881 | 0.903 | 0.897 | 0.878 | 0.898 | 0.908 | 0.816 | 0.848 | 0.004 |
+| 0.10 | 0.994 | 0.881 | 0.903 | 0.896 | 0.877 | 0.897 | 0.908 | 0.815 | 0.849 | 0.004 |
+| 0.15 | 0.992 | 0.882 | 0.904 | 0.896 | 0.877 | 0.896 | 0.909 | 0.816 | 0.850 | 0.004 |
+| 0.20 | 0.991 | 0.882 | 0.905 | 0.895 | 0.878 | 0.895 | 0.910 | 0.815 | 0.850 | 0.004 |
+| 0.25 | 0.986 | 0.883 | 0.906 | 0.891 | 0.880 | 0.893 | 0.911 | 0.812 | 0.850 | 0.004 |
+| 0.30 | 0.984 | 0.884 | 0.906 | 0.889 | 0.881 | 0.893 | 0.913 | 0.810 | 0.849 | 0.004 |
+| 0.35 | 0.979 | 0.886 | 0.907 | 0.884 | 0.883 | 0.893 | 0.915 | 0.806 | 0.850 | 0.003 |
+| 0.40 | 0.974 | 0.888 | 0.909 | 0.883 | 0.885 | 0.890 | 0.919 | 0.807 | 0.851 | 0.003 |
+| **0.45** | **0.965** | **0.892** | **0.911** | **0.879** | **0.887** | **0.884** | **0.923** | **0.803** | **0.854** | **0.003** |
+| 0.50 | 0.952 | 0.896 | 0.916 | 0.868 | 0.892 | 0.881 | 0.928 | 0.795 | 0.857 | 0.003 |
+| 0.55 | 0.933 | 0.903 | 0.922 | 0.857 | 0.900 | 0.875 | 0.935 | 0.778 | 0.863 | 0.002 |
+| 0.60 | 0.911 | 0.908 | 0.926 | 0.841 | 0.906 | 0.859 | 0.939 | 0.767 | 0.868 | 0.002 |
+| 0.65 | 0.881 | 0.916 | 0.932 | 0.820 | 0.912 | 0.837 | 0.946 | 0.744 | 0.878 | 0.002 |
+| 0.70 | 0.845 | 0.925 | 0.939 | 0.790 | 0.924 | 0.817 | 0.954 | 0.720 | 0.884 | 0.001 |
+| 0.75 | 0.800 | 0.937 | 0.948 | 0.759 | 0.935 | 0.786 | 0.964 | 0.685 | 0.900 | 0.001 |
+| 0.80 | 0.753 | 0.948 | 0.957 | 0.725 | 0.944 | 0.755 | 0.973 | 0.643 | 0.917 | 0.001 |
+| 0.85 | 0.683 | 0.958 | 0.966 | 0.659 | 0.955 | 0.705 | 0.979 | 0.577 | 0.929 | 0.001 |
+| 0.90 | 0.570 | 0.970 | 0.977 | 0.559 | 0.970 | 0.605 | 0.986 | 0.477 | 0.946 | 0.000 |
+| 0.95 | 0.323 | 0.990 | 0.992 | 0.316 | 0.990 | 0.376 | 0.997 | 0.251 | 0.977 | 0.000 |
+
+**`y26n_noe2e_warm50-2`:**
+
+| thr | det_recall | acc3 | gender_acc | W_recall | W_prec | M_recall | M_prec | C_recall | C_prec | leak |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0.05 | 0.994 | 0.878 | 0.904 | 0.897 | 0.870 | 0.898 | 0.901 | 0.804 | 0.858 | 0.003 |
+| 0.10 | 0.993 | 0.878 | 0.904 | 0.895 | 0.871 | 0.896 | 0.902 | 0.806 | 0.857 | 0.003 |
+| 0.15 | 0.991 | 0.879 | 0.905 | 0.895 | 0.872 | 0.894 | 0.903 | 0.806 | 0.857 | 0.003 |
+| 0.20 | 0.989 | 0.881 | 0.906 | 0.895 | 0.873 | 0.893 | 0.905 | 0.806 | 0.859 | 0.003 |
+| 0.25 | 0.986 | 0.882 | 0.907 | 0.892 | 0.875 | 0.892 | 0.906 | 0.808 | 0.860 | 0.003 |
+| 0.30 | 0.984 | 0.883 | 0.908 | 0.892 | 0.877 | 0.891 | 0.908 | 0.807 | 0.858 | 0.003 |
+| 0.35 | 0.980 | 0.885 | 0.908 | 0.890 | 0.878 | 0.890 | 0.911 | 0.805 | 0.860 | 0.003 |
+| 0.40 | 0.972 | 0.888 | 0.910 | 0.886 | 0.882 | 0.888 | 0.913 | 0.796 | 0.861 | 0.003 |
+| **0.45** | **0.964** | **0.891** | **0.914** | **0.882** | **0.884** | **0.887** | **0.918** | **0.787** | **0.864** | **0.003** |
+| 0.50 | 0.951 | 0.895 | 0.917 | 0.873 | 0.887 | 0.879 | 0.923 | 0.781 | 0.866 | 0.003 |
+| 0.55 | 0.934 | 0.900 | 0.922 | 0.860 | 0.891 | 0.871 | 0.931 | 0.772 | 0.870 | 0.002 |
+| 0.60 | 0.907 | 0.906 | 0.927 | 0.843 | 0.895 | 0.854 | 0.939 | 0.748 | 0.876 | 0.002 |
+| 0.65 | 0.877 | 0.912 | 0.932 | 0.819 | 0.902 | 0.832 | 0.945 | 0.729 | 0.882 | 0.002 |
+| 0.70 | 0.843 | 0.921 | 0.940 | 0.794 | 0.910 | 0.813 | 0.953 | 0.701 | 0.891 | 0.001 |
+| 0.75 | 0.801 | 0.932 | 0.947 | 0.766 | 0.925 | 0.784 | 0.960 | 0.667 | 0.901 | 0.001 |
+| 0.80 | 0.748 | 0.946 | 0.958 | 0.724 | 0.941 | 0.750 | 0.971 | 0.628 | 0.916 | 0.001 |
+| 0.85 | 0.678 | 0.959 | 0.967 | 0.656 | 0.956 | 0.701 | 0.979 | 0.573 | 0.932 | 0.001 |
+| 0.90 | 0.562 | 0.975 | 0.981 | 0.551 | 0.973 | 0.601 | 0.988 | 0.471 | 0.958 | 0.000 |
+| 0.95 | 0.315 | 0.989 | 0.992 | 0.311 | 0.988 | 0.378 | 0.998 | 0.220 | 0.972 | 0.000 |
+
+**Reading it**: the classic threshold trade is fully visible here — every class's recall falls
+and its precision-matched rises monotonically as the threshold climbs, from (0.05: recall ~0.90,
+precision ~0.85-0.91) to (0.95: recall ~0.22-0.38, precision ~0.97-1.00). `acc3` and
+`gender_acc_adults` *rise* with threshold too, but that is a **survivorship effect, not a real
+accuracy gain** — at 0.95 almost nothing survives to be scored (`n_matched` collapses), and the
+few detections that do are the easy, high-confidence ones; it is not evidence that the model
+"classifies better" at a stricter cut. **Again the two checkpoints track each other almost
+exactly at every threshold** (largest gap: Child recall at low thresholds, `y26n_humanshaped_v2`
++1-3pts over `y26n_noe2e_warm50-2`) — this sweep does not separate them either. Full 19-point
+CSVs/JSONs/SVGs (plus per-class response charts): `models/threshold_sweep_20260908/
+{y26n_humanshaped_v2,y26n_noe2e_warm50-2}_lagenda/`.
+
+### Real per-class precision/recall curves + F1-optimal threshold (2026-09-09)
+
+The table above uses `conf_sweep.py`'s LAGENDA arm, whose "precision" is a **matched-only
+proxy** — it can't see a false detection on a person LAGENDA never labeled. `vlm-cluster/
+pr_curve.py` (new, imports `map_eval.py`'s loading/matching so it stays consistent with every
+AP number in this doc) computes the **real, FP-based per-class precision/recall curve** instead
+— the same convention as CrowdHuman/PASS, but per class: `--gt-labels labels_3class
+--ignore-labels ignore` against the same LAGENDA v2 set, IoU>=0.5, one curve point per detection
+confidence (not just the 19-point grid). This is the direct analogue of Ultralytics'
+`metrics.box.px`/`rx`, built from this repo's own scorer instead of `model.val()`.
+
+**Interactive precision-vs-recall chart (hover any point for its exact threshold):**
+[claude.ai/code/artifact/24297c94-7dde-46be-900d-94487aa54e8b](https://claude.ai/code/artifact/24297c94-7dde-46be-900d-94487aa54e8b)
+— three panels (Woman/Man/Child), both checkpoints overlaid, 0.05-increment markers, the 0.45
+baseline ringed, full 19-threshold data table included. Raw curves (thousands of points per
+class, full precision):
+`models/pr_curves_20260909/{y26n_humanshaped_v2,y26n_noe2e_warm50-2}.json`.
+
+**F1-optimal threshold per class** (max of `2*recall*precision/(recall+precision)` over the full
+curve, not just the 0.05 grid):
+
+| class | `y26n_humanshaped_v2` | `y26n_noe2e_warm50-2` |
+|---|---|---|
+| Woman | thr 0.05* → recall 0.897, precision 0.878 (F1 0.887) | thr 0.30 → recall 0.892, precision 0.877 (F1 0.884) |
+| Man | thr 0.50 → recall 0.881, precision 0.928 (F1 0.904) | thr 0.45 → recall 0.887, precision 0.918 (F1 0.902) |
+| Child | thr 0.15 → recall 0.816, precision 0.850 (F1 0.833) | thr 0.25 → recall 0.808, precision 0.860 (F1 0.833) |
+
+\* **Woman's F1 has no real interior peak on either model** — it is flat-to-declining across the
+whole tested range, so 0.05 wins by sitting at the grid floor, not because there is a knee there;
+treat Man's and Child's optima as the meaningful numbers, Woman's as inconclusive without
+testing below 0.05. Man and Child both land close to the current shipped 0.45 — **nothing in
+this curve argues for moving off 0.45** as a shared threshold. Per-class thresholds are
+technically supported by this pipeline (each class's curve is independent of the others' cutoffs
+at the filtering step) if a genuinely different cut per class is ever wanted.
+
+## LAGENDA benchmark-set mismatch found + corrected (2026-09-09)
+
+**The question that triggered this:** why did `y26n_humanshaped_v2` score so much higher than
+`y26n_noe2e_warm50-2` on LAGENDA mAP (0.859 vs 0.754 mAP50, a ~10.4pt gap) when the only stated
+difference was training on humanshaped/cartoon-promoted labels, and the two checkpoints are
+statistically indistinguishable on every other LAGENDA measurement in this document (the
+classification sweep and PR-curve sections above)?
+
+**Root cause found: the two models were never scored on the same LAGENDA images.**
+`y26n_humanshaped_v2`'s LAGENDA raw dump (`/workspace/mapdump/y26n_humanshaped_v2/lagenda/raw`)
+has **4,601 images** — the corrected LAGENDA v2 set, after this project's own documented fix
+that excludes 298 images overlapping the OIV7 train split (see `docs/DATASET_REGISTRY.md` /
+the LAGENDA contamination note). `y26n_noe2e_warm50-2`'s LAGENDA dump used for the original
+comparison (`/workspace/mapdump/y26n_noe2e_warm50-2/lagenda/raw`) has **4,899 images** — a
+stale dump from before that correction was applied. **Every model in this document except the
+two humanshaped ones was scored on that same stale 4,899-image set** — the humanshaped models
+were the only ones ever benchmarked on the corrected 4,601-image list. `n_gt` (7,098 labeled
+people) is identical either way, confirming the 298 excluded images have zero human-labeled
+people in LAGENDA's sparse ground truth — so those extra images function as pure background
+images in the mAP calculation: any legitimate detection a model makes on a real-but-unlabeled
+person in those 298 images gets scored as a false positive, dragging down precision-based AP
+for every model that was tested against them, while the two humanshaped models were never
+tested there at all.
+
+**Verified by direct re-scoring**, not just by counting images. Every model with an existing raw
+sidecar dump was re-scored on the identical, matched 4,601-image set (`map_eval.py`, no model
+re-run — for models whose dump already existed at 4,601 images the existing file was reused; for
+the rest, a subset raw-sidecar view was built from the stale 4,899-image dump, restricted to the
+matching stems):
+
+| model | original (stale 4,899-img) mAP50 | **corrected (matched 4,601-img) mAP50 / mAP50-95** |
+|---|---|---|
+| `yolo11N-640` (production) | 0.7238 | 0.8228 / 0.7142 |
+| `y26n_sop50` | 0.7584 | 0.8608 / 0.7266 |
+| `y26n_noe2e_warm50-2` | 0.7544 | 0.8567 / 0.7231 |
+| `gelannfav14r4fw_gemlb_v2` | 0.7826 | 0.8820 / 0.7312 |
+| `gelan_r4v2` | 0.7976 | 0.8948 / 0.7401 |
+| `gelan_r6_v2` | 0.7914 | 0.8935 / 0.7349 |
+| `gelan_w_v1` | 0.7789 | 0.8786 / 0.7318 |
+| `y26n_gradsupp` | 0.7890 | 0.8953 / 0.7527 |
+| `y26n_spotlight` | 0.7894 | 0.8947 / 0.7522 |
+| `y26n_unk4` | 0.7885 | 0.8941 / 0.7529 |
+| `yoloe_n` | 0.7857 | 0.8903 / 0.7472 |
+| `y26n_humanshaped_v2` | n/a (already on corrected set) | 0.8588 / 0.7233 |
+| `y26s_humanshaped_smallpatch_v1` | n/a (already on corrected set) | 0.8842 / 0.745 |
+
+**Conclusion: the humanshaped-vs-non-humanshaped LAGENDA gap does not exist.** Once every model
+is scored on the identical image set, `y26n_humanshaped_v2` and `y26n_noe2e_warm50-2` land
+within 0.2 mAP50 points of each other (0.8588 vs 0.8567) — noise, not a training-data effect,
+confirming the classification-sweep and PR-curve findings elsewhere in this document.
+**Every prior claim in this document (and in `experiments/EXP-2026-20-yolo26s-humanshaped-
+smallpatch.md`) that a humanshaped model "wins" or is "best" on LAGENDA mAP is WRONG and should
+be read as corrected here** — five other models (`y26n_gradsupp`, `y26n_spotlight`,
+`y26n_unk4`, `gelan_r4v2`, `gelan_r6_v2`) now outscore both humanshaped models on LAGENDA mAP50
+once fairly measured. This does **not** affect the other datasets in the standard comparison
+(Spotlight-val, CrowdHuman, PASS, object_set, the holdout QA set, or the pixel-level/exposure-
+tier work) — those were independently verified to use consistent image sets across models and
+are unaffected by this specific bug.
+
+**Why this wasn't caught sooner:** `n_images` was recorded correctly in every `map_eval.py`
+output all along (`4601` vs `4899` is visible in every JSON's own metadata) — the comparison
+table simply never cross-checked that field across rows before this investigation. **Lesson for
+future comparisons: always diff `n_images`/`n_gt` across every row of a cross-model table before
+trusting a gap** — this is now a standing check, not a one-off fix.
+
+**Reproduce:** `map_eval.py --raw <raw_dir> --gt-labels /workspace/datasets/lagenda_full/eval_v2/
+labels_3class --ignore-labels /workspace/datasets/lagenda_full/eval_v2/ignore --expect-floor
+0.001 --out <out>.json`. Corrected raw sidecar dirs used: `/workspace/exp_lagenda_bench/
+{yolo11N-640,y26n_sop50,y26n_noe2e_warm50-2,gelannfav14r4fw_gemlb_v2}/lagenda/raw` (already at
+4,601 images) and `/tmp/subset4601_{gelan_r4v2,gelan_r6_v2,gelan_w_v1,y26n_gradsupp,
+y26n_spotlight,y26n_unk4,yoloe_n}` (built as symlink subsets of the stale 4,899-image mapdump
+dumps, restricted to `y26n_humanshaped_v2`'s 4,601 stems — a strict subset relationship,
+verified via `comm` before scoring).

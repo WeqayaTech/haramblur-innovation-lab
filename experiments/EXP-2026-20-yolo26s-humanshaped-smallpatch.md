@@ -10,6 +10,18 @@ this doc checks whether that held up and by how much.
 metric measured** (standard 5-dataset comparison, holdout QA mAP, per-exposure-tier Woman AP,
 and pixel-level escape/false-blur metrics) — see Scorecard. Owner: Mostafa.
 
+**⚠️ CORRECTION (2026-09-09): the LAGENDA mAP result below is WRONG — retract the "wins LAGENDA"
+claim specifically.** A benchmark-set bug was found: this model's LAGENDA dump used a different
+(smaller, corrected) image list than almost every other model in the standard comparison, which
+alone explains the apparent LAGENDA lead. Re-scored on a matched image set, `y26n_humanshaped_v2`
+and its pre-humanshaped predecessor `y26n_noe2e_warm50-2` land within 0.2 mAP50 points of each
+other (0.8588 vs 0.8567) — no real gap — and five other models now outscore both humanshaped
+checkpoints on LAGENDA mAP50 once fairly measured. Full root cause and the corrected 13-model
+table: `docs/MODEL_COMPARISON.md` → "LAGENDA benchmark-set mismatch found + corrected
+(2026-09-09)". **Every other result in this document (Spotlight-val, holdout QA, per-exposure-
+tier Woman AP, pixel-level metrics) was independently verified to use consistent image sets and
+is unaffected** — only the LAGENDA row/claims below are retracted.
+
 ---
 
 ## The short version

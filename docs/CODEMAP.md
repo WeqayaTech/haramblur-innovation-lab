@@ -50,6 +50,8 @@ core** = imported by many other scripts, treat signature changes as breaking.
 | `map_eval.py` | Self-contained COCO-style mAP (AP50/75/50-95, 101-pt interp, per-class+mean, `--ignore-labels`, `--stem-prefix` for multi-size arms) from raw sidecars. `--selftest`. | Active |
 | `conf_sweep.py` | Confidence-threshold optimizer — replays log-raw sidecars offline (no re-run), `--objective`/`--constraint` as arithmetic over metric names, `--mode per-class`, `--pareto`, `--crosscheck` (proven number-for-number vs `eval_negatives_crowd.py`+`run_autolabel_on_manifest.py`), `--out` writes standalone SVGs, `--report` bundles HTML. `--selftest`. | Active |
 | `percurve.py`, `exp19_summary.py` | EXP-2026-19 result readers: per-class AP at apparent sizes, Woman/Child end-to-end curves. Re-readable with no pod. | Active |
+| `bench_tflite.py` | CPU latency benchmark for `.tflite`/LiteRT files via `ai_edge_litert.Interpreter` (fixed 4 threads, 20 warmup + 100 runs, median/p90) — the TFLite counterpart to YOLO-MIT's ONNX-only `bench_onnx.py`. Pod-only, needs real exported files. | Active |
+| `pr_curve.py` | Full per-class precision/recall curve (real FP-based precision, not `conf_sweep.py`'s LAGENDA matched-only proxy) — imports `map_eval.py`'s loading/matching primitives, keeps the raw curve instead of collapsing to AP. The analogue of Ultralytics' own `metrics.box.px/rx`. `--selftest`. | Active |
 | `sam_fp_conf_report.py`, `conf_zoom_report.py` | EXP-2026-07: SAM3 confidence histograms + gate decision table; FP-vs-verified-TP separation. `--selftest`. | Historical |
 | `make_object_negatives.py` | Builds the hand-verified doll/statue/toy negative set (EXP-2026-03). | Historical |
 

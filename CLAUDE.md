@@ -41,16 +41,20 @@ open.
 
 ## Current state (edit this in place — do not append a new dated block, update the facts)
 
-*Last updated: 2026-09-08.*
+*Last updated: 2026-09-09.*
 
 - **Best measured model:** `y26s_humanshaped_smallpatch_v1` —
-  `/workspace/exp20/train/y26s_humanshaped_smallpatch_v1/weights/best.pt`. Best on every
-  mAP/holdout/crowd-recall number measured so far. Not yet shipped.
+  `/workspace/exp20/train/y26s_humanshaped_smallpatch_v1/weights/best.pt`. Best on
+  Spotlight-val/crowd-recall/holdout-QA/per-exposure-tier/pixel-level numbers measured so far.
+  **Not** best on LAGENDA mAP — a 2026-09-09 benchmark-set bug inflated every humanshaped
+  model's LAGENDA score (see `docs/MODEL_COMPARISON.md`, "LAGENDA benchmark-set mismatch"
+  section); once fairly measured, 5 other models outscore it there. Not yet shipped.
 - **Currently shipped in production:** `yolo11N-640` (`v11nclean2` export) —
   `/workspace/model_v2/dataset_v2/yolo11N-640/weights/best.pt`. Worst small-person recall and
   highest object-set FP rate of any model measured — the gap this whole model-eval line exists
   to close. Full comparison: `docs/MODEL_COMPARISON.md`.
-- **Latest completed experiment:** EXP-2026-20 (humanshaped labeling policy + the model above).
+- **Latest completed experiment:** EXP-2026-20 (humanshaped labeling policy + the model above;
+  its LAGENDA claim was retracted 2026-09-09, see correction note in the doc itself).
   Full index: `docs/EXPERIMENT_LOG.md`.
 - **Primary training data:** Spotlight-labeled full OIV7 train split (1.19M kept people) —
   `docs/SPOTLIGHT_PRODUCTION_RUN.md`. Primary eval sets: `haramblur_holdout` (QA/deploy
