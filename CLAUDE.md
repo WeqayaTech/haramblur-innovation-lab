@@ -201,3 +201,7 @@ pod/RunPod/training-specific that isn't listed above.
   hasn't happened — local copies in `_smallperson_review/`, no pod needed.
 - Video temporal-flicker fix (dual-threshold sustain / sticky class vote, designed in EXP-11)
   has not been built or replayed against any candidate model yet.
+- **INT8 export: Child AP50 rises +3.7…+5.3 pts for the nano models under train-calibrated INT8**
+  (2026-09-09 matrix, `docs/MODEL_COMPARISON.md` last section) — unexplained; run the LAGENDA
+  classification sweep on the INT8 `.tflite` files to check it isn't adult→Child leak, and
+  re-sweep deployment thresholds per precision before shipping any INT8 file.

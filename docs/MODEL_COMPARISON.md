@@ -912,6 +912,8 @@ Raw ship-table log: `_spotlight_review/y26s_humanshaped_smallpatch_v1_benchmark/
 
 ## TFLite export size & CPU latency — fp32 vs INT8 (2026-09-08)
 
+*Correction 2026-09-09: the INT8 files in this section were calibrated on the full Spotlight-val split (inherited exporter default). Sizes and latencies stand; for INT8 **accuracy** use the train-calibrated matrix in the last section of this file, "INT8 quantization accuracy matrix — train-calibrated, corrected (2026-09-09)".*
+
 Two YOLO26n candidates for an export decision: **`y26n_humanshaped_v2`** (the newest
 *complete* checkpoint under the current humanshaped-labeling policy,
 `/workspace/exp20/train/y26n_humanshaped_v2/weights/best.pt`) and **`y26n_noe2e_warm50-2`**
@@ -1171,3 +1173,231 @@ labels_3class --ignore-labels /workspace/datasets/lagenda_full/eval_v2/ignore --
 y26n_spotlight,y26n_unk4,yoloe_n}` (built as symlink subsets of the stale 4,899-image mapdump
 dumps, restricted to `y26n_humanshaped_v2`'s 4,601 stems — a strict subset relationship,
 verified via `comm` before scoring).
+
+## INT8 quantization accuracy matrix — train-calibrated, corrected (2026-09-09)
+
+**Why this exists:** the first INT8 accuracy pass (the "val-calibrated" numbers quoted in the
+2026-09-08 TFLite section above and in the previous session's `/workspace/quant_matrix/`) inherited
+ultralytics' export defaults (`split=val`, `fraction=1.0`) and so calibrated every INT8 model's
+quantization ranges on **the same 4,232 Spotlight-val images it was then scored on**. That is
+unsupervised distribution leakage that flatters int8 on that eval set, and 10x more calibration
+images than range statistics need (ultralytics' own source recommends >300). Nobody chose it; see
+memory `int8-calibration-recipe-flaw`. This section redoes the matrix with calibration on a
+fixed 500-image **train**-split subset and evaluation on val, and keeps the flawed arm as a
+comparison column so the leakage delta is visible.
+
+### Calibration methodology (identical for all 9 exports)
+
+```
+sort /workspace/exp12/train_full.txt | awk 'NR % 950 == 1' | head -500 > /workspace/exp12/calib_train500.txt
+sed 's#^train:.*#train: /workspace/exp12/calib_train500.txt#' /workspace/exp12/spotlight_oiv7.yaml > /workspace/exp12/spotlight_oiv7_calib500.yaml
+yolo export model=<run>.pt format=tflite imgsz=<SZ> int8=True data=/workspace/exp12/spotlight_oiv7_calib500.yaml split=train device=cpu
+```
+
+- `calib_train500.txt`: 500 lines, sha256 `55d0a78e75b436b0ace227f49ea027d462b6b0a749c507db36ec51027551bff9`,
+  first three entries `train_tree/images/train/000002c707c9895e.jpg`, `00cb3fbb7339f271.jpg`,
+  `01bf4d4cb674e46c.jpg` (deterministic: sorted list, every 950th line). Zero overlap with
+  `val_full.txt` by construction (different split).
+- `split=train` is what makes the exporter read the `train:` key; with the default `split=val`
+  the yaml's `val:` line (= the eval set) is used regardless of what `train:` says.
+- Ultralytics 8.4.146 (export path `litert_torch 0.9.4`, same as the 2026-09-09 y26s bundle;
+  ai-edge-litert 2.2.0, ai-edge-quantizer 0.9.0, TensorFlow 2.21.0, torch 2.13.0), Python 3.11,
+  `device=cpu`. Post-training INT8 with a representative-dataset calibration, float32 I/O — the
+  same `int8=True` recipe as the 2026-09-08 bundles (that section's "dynamic-range" wording was
+  loose: with a `data=` yaml the exporter runs a calibration pass, which is what this whole
+  section is about).
+- Export dirs: `/workspace/exports/<run>_calib500/sz<SZ>/<run>_int8.tflite` with the full
+  export log (`export_attempt1.log`) and a `status.log` next to each. The `.tflite` bundles
+  (~135 MB total) stay on the pod — the RunPod proxy SSH route has no scp, and they are
+  reproducible from the three lines above.
+
+### Success criterion for an INT8 export (all three, never just one)
+
+1. The `yolo export` process exited **and** its log contains both `Quantized model size` and
+   `export success`.
+2. The output file is ~1/4 of the fp32 TFLite: **~2.87 MB for the YOLO26n models, ~10.2 MB for
+   YOLO26s.** A ~9.8 MB (nano) / ~38 MB (small) file is **not quantized**.
+3. The `Running Calibration::` bar totals `208,000` iterations (500 images × 416 quantization
+   params); with the old val recipe it was `1,760,928` (4,232 × 416).
+
+Why the size rule is the load-bearing one: ultralytics writes a full-size interim `.tflite` at
+the final path *before* calibration. A killed/failed calibration leaves that file in place, exit
+code 0 or not, and a "file exists" check calls it done. **This exact failure was found in the
+previous run**: `/workspace/exports/y26s_humanshaped_smallpatch_v1_20260909/sz640/` holds a
+38,199,244-byte "int8" file whose calibration log ends at 90% (1,583,619/1,760,928) when the
+pod was torn down — so the val-calibrated `y26s_humanshaped_smallpatch_v1` @640 row in the
+comparison column below is **fp32 TFLite, not INT8**, which is why it scored above the fp32
+checkpoint. It is retained, struck through, as the cautionary example.
+
+### The matrix — Spotlight-val (4,232 images, 8,035 GT people, 702 ignore boxes), `map_eval.py`, pycocotools 101-pt, floor 0.001
+
+Three rows per model × size. **fp32 `.pt`** is the checkpoint itself (the 640 rows are the
+standing numbers from `/workspace/evalout_v2/<run>_map_spotval.json`, reused verbatim; the
+416/320 rows were run this session on the GPU with the same script). **fp32 TFLite** is a fresh
+un-calibrated export under the same toolchain as the INT8 rows — it is the *right* baseline for
+a quantization-only delta, because it removes the export path from the comparison. **INT8
+TFLite** is the train-calibrated export. Every row is `n_images=4232, n_gt=8035` (asserted, not
+assumed — see the LAGENDA section above for why).
+
+| model | imgsz | precision / path | mAP50 | mAP50-95 | Woman AP50 | Man AP50 | Child AP50 | mAP50-95 S / M / L | val-calibrated INT8 (flawed arm) mAP50 / mAP50-95 | train − val calib Δ |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `y26n_humanshaped_v2` | 640 | fp32 `.pt` | 0.8060 | 0.7035 | 0.8226 | 0.8595 | 0.7358 | 0.3384 / 0.5764 / 0.7666 | |  |
+| `y26n_humanshaped_v2` | 640 | fp32 TFLite | 0.8066 | 0.7037 | 0.8235 | 0.8624 | 0.7339 | 0.3367 / 0.5790 / 0.7667 | |  |
+| `y26n_humanshaped_v2` | 640 | **INT8 TFLite, train-calibrated** | 0.8201 | 0.6615 | 0.8220 | 0.8551 | 0.7832 | 0.2915 / 0.5012 / 0.7460 | 0.8114 / 0.6525 | +0.0087 / +0.0090 |
+| `y26n_humanshaped_v2` | 416 | fp32 `.pt` | 0.8005 | 0.6886 | 0.8275 | 0.8325 | 0.7414 | 0.3215 / 0.5540 / 0.7604 | |  |
+| `y26n_humanshaped_v2` | 416 | fp32 TFLite | 0.7983 | 0.6884 | 0.8240 | 0.8381 | 0.7328 | 0.3214 / 0.5523 / 0.7599 | |  |
+| `y26n_humanshaped_v2` | 416 | **INT8 TFLite, train-calibrated** | 0.8198 | 0.6774 | 0.8339 | 0.8394 | 0.7862 | 0.3156 / 0.5240 / 0.7635 | 0.8094 / 0.6687 | +0.0104 / +0.0087 |
+| `y26n_humanshaped_v2` | 320 | fp32 `.pt` | 0.7865 | 0.6623 | 0.8221 | 0.8103 | 0.7270 | 0.2924 / 0.5111 / 0.7417 | |  |
+| `y26n_humanshaped_v2` | 320 | fp32 TFLite | 0.7862 | 0.6633 | 0.8222 | 0.8132 | 0.7231 | 0.3006 / 0.5112 / 0.7431 | |  |
+| `y26n_humanshaped_v2` | 320 | **INT8 TFLite, train-calibrated** | 0.8166 | 0.6679 | 0.8477 | 0.8293 | 0.7727 | 0.2842 / 0.5204 / 0.7465 | 0.7913 / 0.6345 | +0.0253 / +0.0334 |
+| `y26n_noe2e_warm50-2` | 640 | fp32 `.pt` | 0.8022 | 0.6971 | 0.8105 | 0.8643 | 0.7319 | 0.3368 / 0.5711 / 0.7599 | |  |
+| `y26n_noe2e_warm50-2` | 640 | fp32 TFLite | 0.8063 | 0.7014 | 0.8116 | 0.8668 | 0.7405 | 0.3365 / 0.5772 / 0.7626 | |  |
+| `y26n_noe2e_warm50-2` | 640 | **INT8 TFLite, train-calibrated** | 0.8115 | 0.6544 | 0.7998 | 0.8572 | 0.7774 | 0.3026 / 0.5029 / 0.7322 | 0.8029 / 0.6435 | +0.0086 / +0.0109 |
+| `y26n_noe2e_warm50-2` | 416 | fp32 `.pt` | 0.8037 | 0.6921 | 0.8393 | 0.8407 | 0.7311 | 0.3221 / 0.5574 / 0.7652 | |  |
+| `y26n_noe2e_warm50-2` | 416 | fp32 TFLite | 0.8020 | 0.6921 | 0.8375 | 0.8447 | 0.7237 | 0.3243 / 0.5587 / 0.7641 | |  |
+| `y26n_noe2e_warm50-2` | 416 | **INT8 TFLite, train-calibrated** | 0.8103 | 0.6665 | 0.8391 | 0.8413 | 0.7505 | 0.2950 / 0.5214 / 0.7514 | 0.8074 / 0.6671 | +0.0029 / -0.0006 |
+| `y26n_noe2e_warm50-2` | 320 | fp32 `.pt` | 0.7849 | 0.6595 | 0.8259 | 0.8180 | 0.7108 | 0.2878 / 0.5070 / 0.7407 | |  |
+| `y26n_noe2e_warm50-2` | 320 | fp32 TFLite | 0.7859 | 0.6629 | 0.8234 | 0.8177 | 0.7167 | 0.2962 / 0.5138 / 0.7414 | |  |
+| `y26n_noe2e_warm50-2` | 320 | **INT8 TFLite, train-calibrated** | 0.8087 | 0.6629 | 0.8478 | 0.8307 | 0.7475 | 0.2833 / 0.5108 / 0.7463 | 0.7914 / 0.6368 | +0.0173 / +0.0261 |
+| `y26s_humanshaped_smallpatch_v1` | 640 | fp32 `.pt` | 0.8500 | 0.7637 | 0.8742 | 0.8910 | 0.7847 | 0.3951 / 0.6378 / 0.8339 | |  |
+| `y26s_humanshaped_smallpatch_v1` | 640 | fp32 TFLite | 0.8527 | 0.7682 | 0.8759 | 0.8918 | 0.7905 | 0.3999 / 0.6458 / 0.8362 | |  |
+| `y26s_humanshaped_smallpatch_v1` | 640 | **INT8 TFLite, train-calibrated** | 0.8487 | 0.7019 | 0.8679 | 0.8828 | 0.7955 | 0.3660 / 0.5514 / 0.7896 | ~~0.8527 / 0.7682~~ (unquantized, see text) | n/a |
+| `y26s_humanshaped_smallpatch_v1` | 416 | fp32 `.pt` | 0.8528 | 0.7610 | 0.8771 | 0.8749 | 0.8064 | 0.3581 / 0.6305 / 0.8365 | |  |
+| `y26s_humanshaped_smallpatch_v1` | 416 | fp32 TFLite | 0.8523 | 0.7606 | 0.8773 | 0.8801 | 0.7995 | 0.3699 / 0.6338 / 0.8346 | |  |
+| `y26s_humanshaped_smallpatch_v1` | 416 | **INT8 TFLite, train-calibrated** | 0.8416 | 0.7095 | 0.8708 | 0.8739 | 0.7801 | 0.3225 / 0.5727 / 0.7990 | 0.8447 / 0.7148 | -0.0031 / -0.0053 |
+| `y26s_humanshaped_smallpatch_v1` | 320 | fp32 `.pt` | 0.8319 | 0.7323 | 0.8533 | 0.8580 | 0.7845 | 0.3014 / 0.5886 / 0.8172 | |  |
+| `y26s_humanshaped_smallpatch_v1` | 320 | fp32 TFLite | 0.8370 | 0.7350 | 0.8619 | 0.8600 | 0.7892 | 0.3266 / 0.5905 / 0.8189 | |  |
+| `y26s_humanshaped_smallpatch_v1` | 320 | **INT8 TFLite, train-calibrated** | 0.8497 | 0.7181 | 0.8780 | 0.8730 | 0.7982 | 0.3061 / 0.5770 / 0.8030 | 0.8327 / 0.6959 | +0.0170 / +0.0222 |
+
+**Quantization-only deltas** (INT8 minus fp32 TFLite, same size, same toolchain):
+
+| model | imgsz | Δ mAP50 (int8 − fp32 TFLite) | Δ mAP50-95 | Δ Woman | Δ Man | Δ Child | Δ mAP50-95 small |
+|---|---|---|---|---|---|---|---|
+| `y26n_humanshaped_v2` | 640 | +0.0135 | -0.0422 | -0.0015 | -0.0073 | +0.0493 | -0.0452 |
+| `y26n_humanshaped_v2` | 416 | +0.0215 | -0.0110 | +0.0099 | +0.0013 | +0.0534 | -0.0058 |
+| `y26n_humanshaped_v2` | 320 | +0.0304 | +0.0046 | +0.0255 | +0.0161 | +0.0496 | -0.0164 |
+| `y26n_noe2e_warm50-2` | 640 | +0.0052 | -0.0470 | -0.0118 | -0.0096 | +0.0369 | -0.0339 |
+| `y26n_noe2e_warm50-2` | 416 | +0.0083 | -0.0256 | +0.0016 | -0.0034 | +0.0268 | -0.0293 |
+| `y26n_noe2e_warm50-2` | 320 | +0.0228 | +0.0000 | +0.0244 | +0.0130 | +0.0308 | -0.0129 |
+| `y26s_humanshaped_smallpatch_v1` | 640 | -0.0040 | -0.0663 | -0.0080 | -0.0090 | +0.0050 | -0.0339 |
+| `y26s_humanshaped_smallpatch_v1` | 416 | -0.0107 | -0.0511 | -0.0065 | -0.0062 | -0.0194 | -0.0474 |
+| `y26s_humanshaped_smallpatch_v1` | 320 | +0.0127 | -0.0169 | +0.0161 | +0.0130 | +0.0090 | -0.0205 |
+
+### What the matrix says
+
+1. **The TFLite export path is faithful.** fp32 TFLite vs fp32 `.pt` agree within ±0.005
+   mAP50 and ±0.005 mAP50-95 in all 9 cells (largest gap: `y26s_humanshaped_smallpatch_v1`
+   @320, 0.8370 vs 0.8319). So any int8-vs-fp32 difference below is quantization, not export.
+   Corollary: the val-calibrated `y26s_humanshaped_smallpatch_v1` @640 "int8" number from the
+   previous session (0.8527 / 0.7682) is **identical to this session's fp32 TFLite row** — the
+   definitive confirmation that that file was never quantized.
+
+2. **INT8 costs fine localization, not IoU-0.5 detection — and the pattern is stronger than
+   the val-calibrated arm suggested.** mAP50-95 drops at 640 (−4.2 / −4.7 / −6.6 pts for
+   `y26n_humanshaped_v2` / `y26n_noe2e_warm50-2` / `y26s_humanshaped_smallpatch_v1`) and at
+   416 (−1.1 / −2.6 / −5.1), and is flat at 320 (+0.5 / 0.0 / −1.7). Small-object mAP50-95
+   drops in every one of the 9 cells (−0.6 to −4.7 pts). mAP50, meanwhile, does **not** drop for
+   the nanos — it *rises* in all six nano cells (+0.5 to +3.0 pts, largest at 320) — and for
+   y26s moves −0.4 / −1.1 / +1.3.
+
+3. **`y26s_humanshaped_smallpatch_v1` is the least INT8-robust of the three, not the most.**
+   It has the largest mAP50-95 loss at both 640 and 416 and is the only model whose mAP50 goes
+   down at those sizes. If the export decision is "y26s at 416 in INT8", budget ≈ −1.1 mAP50 /
+   −5.1 mAP50-95 against its fp32 TFLite (0.8523 / 0.7606 → 0.8416 / 0.7095) — it still beats
+   both nanos' fp32 on every column, at 3.7x their file size (10.2 MB vs 2.87 MB). Hypothesis,
+   not measured: the larger model's wider activation ranges quantize worse under per-tensor
+   min/max calibration.
+
+4. **The mAP50 *rise* under INT8 is real in the numbers and unexplained.** A background
+   diagnostic over the raw sidecars (`/workspace/dets_diag.log`, first cells) shows INT8 emits
+   *fewer* raw boxes above the 0.001 floor than fp32 TFLite (e.g. `y26n_humanshaped_v2` @640:
+   41,935 vs 44,432) but *more* above 0.25 (8,936 vs 8,428) — a confidence redistribution, not
+   extra low-confidence boxes padding the PR tail. Two consequences: (a) **do not reuse fp32
+   deployment thresholds for an INT8 export** — re-sweep per precision (the 2026-09-08
+   threshold-sweep tooling applies unchanged); (b) the per-class movement is not uniform:
+   Child AP50 rises +3.7 to +5.3 pts for the nanos at every size while Woman/Man move within
+   ±1 pt at 640/416. Whether that Child gain is better-ranked real children or extra
+   Child-labelled boxes on adults (the adult-escape direction) is **not answerable from mAP** —
+   it needs the LAGENDA classification sweep run on the INT8 files. Open item.
+
+5. **Train-calibration on 500 images was as good as or better than val-calibration on 4,232
+   in 7 of 8 comparable cells** (column "train − val calib Δ": +0.3 to +2.5 mAP50, +0.9 to
+   +3.3 mAP50-95; tie at `y26n_noe2e_warm50-2` @416; −0.3 / −0.5 at y26s @416). The direction is
+   the *opposite* of "leakage flatters the val arm": calibrating on the eval images did not buy
+   the val arm anything, and at 320 the 4,232-image calibration was clearly worse (−1.7 to −2.5
+   mAP50). Consistent with the range-widening mechanism in memory
+   `int8-calibration-recipe-flaw` (more calibration images → more outlier activations → wider
+   per-tensor ranges → coarser steps). **Retire the val-calibrated arm**: it is neither a
+   cleaner baseline nor a better export. Export time also fell from 13–20 min to 0.8–7.7 min
+   per model on 13.6 cores.
+
+### What this does NOT show (harshest reader)
+
+- **Spotlight-val only, and its labels come from the same pipeline that trained these models.**
+  That bias is identical for the fp32 and INT8 rows of the *same* model, so within-model
+  precision deltas are valid; the cross-model gaps in this table are **not** a ranking (LAGENDA
+  `fl1199`, CrowdHuman, PASS, `object_set`, and `haramblur_holdout` sections above do that). It
+  says nothing about the Gulf-dress misread, object-set false positives, crowd recall, or the
+  adult→Child leak rate under INT8 — point 4 above is the closest it gets, and it is a flag,
+  not a measurement.
+- **One calibration draw.** Every INT8 row is a single 500-image subset (the hash above). The
+  variance across calibration draws was not measured, so any arm-to-arm gap under ~1 pt
+  (several cells in the val-vs-train column, the y26s mAP50 deltas at 640/416) may be draw
+  noise. The 4–7 pt mAP50-95 losses at 640 are far outside that and stand.
+- **The val-vs-train comparison is not a controlled experiment.** Source (val vs train) and
+  count (4,232 vs 500) changed together, and for the two nano bundles the toolchain may also
+  differ (`humanshaped_v2_20260902` / `noe2e_warm50-2_20260908` were exported under Ultralytics
+  8.4.144; `/workspace/exports_build.log` mentions `onnx2tf`; the y26s bundle and everything
+  here used `litert_torch 0.9.4`). It shows the old arm was not better; it does not isolate why.
+- **Latency was not re-measured.** The 2026-09-08 size/latency table stands (same architectures;
+  file sizes here match it to within 0.1%): INT8 is a 3.4x size win everywhere and a speed win
+  only at 320.
+- **The fp32 416/320 `.pt` rows ran on a GPU (RTX 4090, torch 2.13.0+cu130) while every TFLite
+  row ran on CPU/XNNPACK.** The ±0.005 agreement in point 1 says this didn't matter here, but
+  the two device paths are not byte-identical.
+
+### Verify it yourself (verbatim; every threshold and its source)
+
+```
+# calibration subset (deterministic) + yaml
+sort /workspace/exp12/train_full.txt | awk 'NR % 950 == 1' | head -500 > /workspace/exp12/calib_train500.txt
+sha256sum /workspace/exp12/calib_train500.txt   # 55d0a78e75b436b0ace227f49ea027d462b6b0a749c507db36ec51027551bff9
+sed 's#^train:.*#train: /workspace/exp12/calib_train500.txt#' /workspace/exp12/spotlight_oiv7.yaml > /workspace/exp12/spotlight_oiv7_calib500.yaml
+# INT8 export (per run/size, cwd = /workspace/exports/<run>_calib500/sz<SZ>, checkpoint copied in as <run>.pt)
+OMP_NUM_THREADS=1 TF_NUM_INTRAOP_THREADS=2 yolo export model=<run>.pt format=tflite imgsz=<SZ> int8=True \
+  data=/workspace/exp12/spotlight_oiv7_calib500.yaml split=train device=cpu
+# fp32 TFLite export (same dir, no calibration)
+yolo export model=<run>.pt format=tflite imgsz=<SZ> device=cpu
+# inference (raw sidecar logs every box >= --floor; --conf 0.45 default only sets the 'kept' flag, map_eval ignores it)
+OMP_NUM_THREADS=T MKL_NUM_THREADS=T python3 /workspace/data_inspection_tools/vlm-cluster/run_ultralytics_labels.py \
+  --engine ultralytics --model <file.tflite or best.pt> --imgsz <SZ> --device cpu|cuda:0 \
+  --images /workspace/exp12/images_val4232 --out <out> --floor 0.001
+# scoring (never model.val(): different AP convention, no ignore regions)
+python3 /workspace/data_inspection_tools/vlm-cluster/map_eval.py --raw <out>/raw \
+  --gt-labels /workspace/spotlight/run/oiv7_val/labels --ignore-labels /workspace/spotlight/run/oiv7_val/ignore_unk \
+  --expect-floor 0.001 --out <out>_map.json
+```
+
+Thresholds: `--floor 0.001` (raw-sidecar floor; `map_eval.py --expect-floor` asserts the dump was
+made at it), IoU 0.50:0.05:0.95 and 101-point interpolation inside `map_eval.py`, ignore regions
+IoA ≥ 0.5 (702 unknown-gender boxes), `max_dets_per_image=100`. NMS IoU 0.7 (`--iou` default
+in `run_ultralytics_labels.py`), applied identically to every row.
+
+Pipeline scripts as run (all on the volume): `/workspace/quant_calib500_pipeline.sh` (export →
+infer → score, 9 jobs, size check + `export_ok` marker), `/workspace/fp32tflite.sh` (fp32 TFLite
+rows), `/workspace/fp32_smallsz.sh` (fp32 `.pt` 416/320 rows), `/workspace/repair_calib500.sh`
+(see below). Outputs: `/workspace/quant_matrix_calib500/<run>/{sz,fp32tflite_sz,fp32_sz}<SZ>_spotval{,_map.json,.log}`;
+exports `/workspace/exports/<run>_calib500/sz<SZ>/<run>_{int8,fp32}.tflite` (+ `export_attempt1.log`,
+`export_fp32.log`, `status.log`). Local copies of all 28 `_map.json` files (9 INT8, 9 fp32
+TFLite, 6 fp32 `.pt` 416/320, the 3 standing fp32 @640 JSONs, and the val-calibrated y26s @416
+scored this session): `models/quant_matrix_calib500_20260909/` (gitignored).
+
+**Incident that shaped the run (so the next person doesn't re-learn it):** the network volume
+hit its quota mid-run (`Errno 122`), which (a) killed one inference job at 1,729/4,232, (b)
+wrote three 0-byte `_map.json` files that parsed as "done", and (c) left 47 raw sidecars missing
+in `y26n_noe2e_warm50-2` @640 that a plain resume would have skipped forever — the script's
+resume test is "label file exists", not "raw JSON exists". Every INT8 directory was therefore
+re-validated (`repair_calib500.sh`: parse every raw JSON, delete unparseable ones, delete label
+files for stems without a valid raw JSON, resume, rescore, assert `n_images == 4232`) before any
+number above was taken. Memory: `run-ultralytics-labels-resume-is-label-based`,
+`runpod-volume-and-gemini-storage-caps`.
