@@ -1401,3 +1401,45 @@ re-validated (`repair_calib500.sh`: parse every raw JSON, delete unparseable one
 files for stems without a valid raw JSON, resume, rescore, assert `n_images == 4232`) before any
 number above was taken. Memory: `run-ultralytics-labels-resume-is-label-based`,
 `runpod-volume-and-gemini-storage-caps`.
+
+### FP16 TFLite (weight-cast, 2026-09-10)
+
+**Why:** a reviewer asked for FP16 as the "almost identical, half the size" option, and as the
+safe alternative at 640 px where INT8 loses 4–7 pts mAP50-95. Ultralytics 8.4.146 refuses it on
+its TFLite path (`quantize=16 (FP16) is not supported; format='litert' supports quantize=8,
+'w8a16', 'w8a32', 32 or None`), so the FP16 files are the **train-calibrated fp32 TFLite exports
+with weights cast to float16 by `ai_edge_quantizer`** (`update_quantization_recipe(regex=".*",
+operation_name="*", algorithm_key="float_casting", op_config=OpQuantizationConfig(
+weight_tensor_config=TensorQuantizationConfig(num_bits=16, dtype=FLOAT)))`, ai-edge-quantizer
+installed alongside the venv above). No calibration data is involved. Same graph (416 quantization
+params, 659 tensors), ~125 ms per file. Files:
+`/workspace/exports/<run>_calib500/sz<SZ>/<run>_fp16.tflite`, exactly half the fp32 size —
+5,134,576 / 5,076,384 / 5,058,976 bytes (640/416/320, both nanos) and 19,333,408 / 19,275,216 /
+19,257,808 (y26s); sha256 prefixes `06500a29039ed62a` `80a7d0ae0fb7d6ee` `d94400ac4c3bd721`
+(`y26n_humanshaped_v2`), `8dc0f4221e4ff8ed` `a26ab6dd495c4fb0` `57ff2e76c9d60964`
+(`y26n_noe2e_warm50-2`), `8aee8c4475e97714` `fc3b901a89bcfe63` `0ba546a1eacc1466` (y26s).
+Evaluation: identical pipeline to the INT8 rows (`run_ultralytics_labels.py --engine ultralytics
+--device cpu --floor 0.001` on `/workspace/exp12/images_val4232`, `map_eval.py` with
+`oiv7_val/labels` + `ignore_unk`, every row asserted `n_images=4232`), raw dumps and scores at
+`/workspace/quant_matrix_calib500/<run>/fp16tflite_sz<SZ>_spotval{,_map.json}`, local copies in
+`models/quant_matrix_calib500_20260909/<run>__fp16tflite_sz<SZ>_spotval_map.json`.
+
+| model | imgsz | fp32 TFLite mAP50 / mAP50-95 | **FP16** mAP50 / mAP50-95 | FP16 − fp32 | INT8 (train-cal) mAP50 / mAP50-95 | file MB fp32 / FP16 / INT8 |
+|---|---|---|---|---|---|---|
+| `y26n_humanshaped_v2` | 640 | 0.8066 / 0.7037 | 0.8067 / 0.7041 | +0.0001 / +0.0004 | 0.8201 / 0.6615 | 9.84 / 5.13 / 2.89 |
+| `y26n_humanshaped_v2` | 416 | 0.7983 / 0.6884 | 0.7983 / 0.6885 | +0.0000 / +0.0001 | 0.8198 / 0.6774 | 9.78 / 5.08 / 2.87 |
+| `y26n_humanshaped_v2` | 320 | 0.7862 / 0.6633 | 0.7862 / 0.6634 | +0.0000 / +0.0001 | 0.8166 / 0.6679 | 9.76 / 5.06 / 2.87 |
+| `y26n_noe2e_warm50-2` | 640 | 0.8063 / 0.7014 | 0.8063 / 0.7014 | +0.0000 / +0.0000 | 0.8115 / 0.6544 | 9.84 / 5.13 / 2.89 |
+| `y26n_noe2e_warm50-2` | 416 | 0.8020 / 0.6921 | 0.8020 / 0.6921 | +0.0000 / +0.0000 | 0.8103 / 0.6665 | 9.78 / 5.08 / 2.87 |
+| `y26n_noe2e_warm50-2` | 320 | 0.7859 / 0.6629 | 0.7860 / 0.6626 | +0.0001 / −0.0003 | 0.8087 / 0.6629 | 9.76 / 5.06 / 2.87 |
+| `y26s_humanshaped_smallpatch_v1` | 640 | 0.8527 / 0.7682 | 0.8527 / 0.7681 | +0.0000 / −0.0001 | 0.8487 / 0.7019 | 38.20 / 19.33 / 10.20 |
+| `y26s_humanshaped_smallpatch_v1` | 416 | 0.8523 / 0.7606 | 0.8523 / 0.7606 | +0.0000 / +0.0000 | 0.8416 / 0.7095 | 38.14 / 19.28 / 10.19 |
+| `y26s_humanshaped_smallpatch_v1` | 320 | 0.8370 / 0.7350 | 0.8369 / 0.7351 | −0.0001 / +0.0001 | 0.8497 / 0.7181 | 38.12 / 19.26 / 10.19 |
+
+**Reading it:** FP16 is fp32 — every cell within ±0.0004, per-class and small-object AP included
+(largest gap anywhere: y26s @320 small-object mAP50-95 0.3262 vs 0.3266). It is the zero-risk way
+to halve the file, and the natural choice at 640 px, where INT8 costs 4–7 pts mAP50-95 for a
+further 1.8x size reduction. **It is not a speed win on the CPU/XNNPACK path** — fp16 weights are
+dequantized to fp32 at load, so per-inference cost equals fp32 (unmeasured here; a GPU/WebGPU
+delegate can run fp16 natively and may be faster, also unmeasured). Same Spotlight-val-only
+scope caveat as the INT8 section: within-model precision deltas only, not a cross-model ranking.

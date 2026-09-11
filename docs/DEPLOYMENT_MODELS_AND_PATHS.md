@@ -18,6 +18,7 @@ Classes in every artifact: `0 = Woman, 1 = Man, 2 = Child`.
 **Recommended operating point: INT8 at 416 px** (see `docs/MODEL_COMPARISON.md`, section
 "INT8 quantization accuracy matrix — train-calibrated, corrected"). INT8 costs no detection or
 classification accuracy (mAP50 flat or up for the nanos); it costs box tightness, least at 416/320.
+**If any accuracy loss is unacceptable, ship FP16** (below): identical to fp32, half the size.
 
 ## TFLite / LiteRT exports — use these (train-calibrated, 2026-09-09)
 
@@ -39,13 +40,44 @@ Directory pattern: `/workspace/exports/<model>_calib500/sz<SZ>/<model>_{int8,fp3
 `status.log`). INT8 calibration: 500 train-split images (`/workspace/exp12/calib_train500.txt`,
 sha256 `55d0a78e…bff9`), Ultralytics 8.4.146 / ai-edge-litert 2.2.0.
 
+## FP16 TFLite — half the size, identical accuracy (2026-09-10)
+
+fp32 weights cast to float16 (no calibration). Measured **identical to fp32 within ±0.0004 mAP** in
+all nine cells — the zero-risk way to halve the download, and the safe choice at 640 px where INT8
+costs 4–7 pts mAP50-95. Not faster than fp32 on CPU (weights are dequantized at load); may be
+faster on GPU/WebGPU delegates (unmeasured). Same I/O contract as the other TFLite files.
+
+| model | px | file | size | sha256 |
+|---|---|---|---|---|
+| `y26n_humanshaped_v2` | 640 | `…_calib500/sz640/y26n_humanshaped_v2_fp16.tflite` | 5.13 MB | `06500a29039ed62a…` |
+| | 416 | `…_calib500/sz416/y26n_humanshaped_v2_fp16.tflite` | 5.08 MB | `80a7d0ae0fb7d6ee…` |
+| | 320 | `…_calib500/sz320/y26n_humanshaped_v2_fp16.tflite` | 5.06 MB | `d94400ac4c3bd721…` |
+| `y26n_noe2e_warm50-2` | 640 | `…_calib500/sz640/y26n_noe2e_warm50-2_fp16.tflite` | 5.13 MB | `8dc0f4221e4ff8ed…` |
+| | 416 | `…_calib500/sz416/y26n_noe2e_warm50-2_fp16.tflite` | 5.08 MB | `a26ab6dd495c4fb0…` |
+| | 320 | `…_calib500/sz320/y26n_noe2e_warm50-2_fp16.tflite` | 5.06 MB | `57ff2e76c9d60964…` |
+| `y26s_humanshaped_smallpatch_v1` | 640 | `…_calib500/sz640/y26s_humanshaped_smallpatch_v1_fp16.tflite` | 19.33 MB | `8aee8c4475e97714…` |
+| | 416 | `…_calib500/sz416/y26s_humanshaped_smallpatch_v1_fp16.tflite` | 19.28 MB | `fc3b901a89bcfe63…` |
+| | 320 | `…_calib500/sz320/y26s_humanshaped_smallpatch_v1_fp16.tflite` | 19.26 MB | `0ba546a1eacc1466…` |
+
 ## TF.js exports (for the current TF.js extension runtime)
 
-Only `y26n_humanshaped_v2` has them so far: `/workspace/exports/humanshaped_tfjs/y26n_humanshaped_v2_<SZ>_{float,uint8}/`
-for SZ in 640/416/320 — each a graph-model folder (`model.json`, `group1-shard1of1.bin`,
-`metadata.yaml`). `uint8` = weight-quantized via `tensorflowjs_converter --quantize_uint8` (~4.8 MB
-vs ~12 MB float). Recipe to produce the same for the other two models: `docs/TFJS_EXPORT_RECIPE.md`
-(pinned `ultralytics==8.4.82`; newer versions no longer export TF.js).
+All three candidates, all three sizes, float + uint8 (2026-09-10; `y26n_humanshaped_v2` set built
+2026-09-02 with the same recipe):
+
+| model | pod folder (SZ ∈ 640/416/320) | float | uint8 |
+| --- | --- | --- | --- |
+| `y26n_humanshaped_v2` | `/workspace/exports/humanshaped_tfjs/y26n_humanshaped_v2_<SZ>_{float,uint8}/` | 10.1–10.2 MB | 2.97–3.00 MB |
+| `y26n_noe2e_warm50-2` | `/workspace/exports/tfjs_all/y26n_noe2e_warm50-2_<SZ>_{float,uint8}/` | 10.1–10.2 MB | 2.97–3.00 MB |
+| `y26s_humanshaped_smallpatch_v1` | `/workspace/exports/tfjs_all/y26s_humanshaped_smallpatch_v1_<SZ>_{float,uint8}/` | 38.7–38.9 MB | 10.3–10.4 MB |
+
+Each is a graph-model folder (`model.json`, `group1-shard*.bin`, `metadata.yaml`), exported with
+`end2end=False, nms=False` so the output is the same raw `[1,7,N]` head the extension already
+post-processes. **`uint8` = weight-only quantization** (`tensorflowjs_converter --quantize_uint8 '*'`;
+activations stay float32) — accuracy ≈ the float/`.pt` rows, *not* the static-INT8 TFLite rows.
+Local copy with drop-in instructions for the extension's `src/models/<id>/` tiers, IndexedDB-cache
+caveat, and SHA256SUMS: `models/extension_tfjs_20260910/README.md` (gitignored, 216 MB). Builder:
+`vlm-cluster/tfjs_build_two.sh`; recipe: `docs/TFJS_EXPORT_RECIPE.md` (pinned `ultralytics==8.4.82`;
+newer versions no longer export TF.js).
 
 ## Input / output contract (identical for every TFLite and TF.js file above)
 
