@@ -1443,3 +1443,44 @@ further 1.8x size reduction. **It is not a speed win on the CPU/XNNPACK path** �
 dequantized to fp32 at load, so per-inference cost equals fp32 (unmeasured here; a GPU/WebGPU
 delegate can run fp16 natively and may be faster, also unmeasured). Same Spotlight-val-only
 scope caveat as the INT8 section: within-model precision deltas only, not a cross-model ranking.
+
+## Why INT8 loses at 640 — located and fixed (EXP-2026-21, 2026-09-11)
+
+The train-calibrated W8A8 loss at 640 (−4.2 / −4.7 / −6.6 mAP50-95) is **int8 activation resolution
+in the detect head's decode ops**, not calibration data and not weights. Evidence
+(`experiments/EXP-2026-21-int8-output-quantization.md`, all cells Spotlight-val @640, same scorer):
+
+| model | fp32 TFLite | INT8 W8A8 | `w8a32` (int8 weights only) | `w8a16` | **W8A8 + float decode ops (D1)** | W8A8 + whole head float |
+| --- | --- | --- | --- | --- | --- | --- |
+| `y26n_humanshaped_v2` | 0.7037 | 0.6615 | 0.6977 | 0.6967 | **0.7296** | 0.6972 |
+| `y26n_noe2e_warm50-2` | 0.7014 | 0.6544 | 0.6948 | 0.6948 | **0.7174** | 0.6830 |
+| `y26s_humanshaped_smallpatch_v1` | 0.7682 | 0.7019 | 0.7646 | — | **0.7706** | 0.7603 |
+
+- Mechanism: the head concatenates P3/P4/P5 regression distances into one `[1,4,8400]` int8 tensor
+  (scale 0.313 stride-units → 2.5 / 5 / 10 px steps), then a pixel-space box tensor (step 2.67 px),
+  then the normalized output (scale 0.0041765). Box-edge error vs fp32 grows with stride level
+  (1.9 / 3.6 / 4.8 px at 640) and scales with input size → IoU-sensitive mAP50-95 collapses, mAP50 does not.
+- Fix: `vlm-cluster/float_head_quant.py` — ultralytics' own `static_wi8_ai8` recipe plus
+  `NO_QUANTIZE` on regex `.*Detect_23;.*|.*_NormalizeCoords;.*|.*serving_default_output_0.*`
+  (31 elementwise tensors stay float; every conv stays int8). Nano file 2.96 MB vs 2.82 MB.
+- Not shippable as-is: **latency of D1 not yet measured** (expected ≈ INT8), and D1/INT8 carry a
+  nano-only **Child AP gain of +7 pts** that comes from int8 head convs and is not understood —
+  run the LAGENDA classification sweep on the D1 files before trusting it (see "Open items").
+- `w8a16` is not an option: int16 activation kernels ran ≈ 7× slower than int8 on XNNPACK.
+
+**Latency measured 2026-09-11** (5-core pod, 4 threads, @640, median ms): `y26n_humanshaped_v2`
+fp32 25.7 · INT8 21.4 · **D1 fix 22.9** · `w8a32` 32.7 · `w8a16` 1,425; `y26s_humanshaped_smallpatch_v1`
+fp32 70.6 · INT8 46.7 · **D1 46.6**. The fix keeps INT8 speed.
+
+**Fourth model added 2026-09-11 — `y26n_humanshaped_v2_distill_v1`** (epoch 61/100 checkpoint,
+sha `edd694c08585af1c…`), mAP50-95 Spotlight-val:
+
+| size | `.pt` | fp32 TFLite | INT8 W8A8 | **D1 fix** |
+| --- | --- | --- | --- | --- |
+| 640 | 0.6848 | 0.6885 | 0.6560 | **0.7105** |
+| 416 | 0.6808 | 0.6778 | 0.6825 | **0.6928** |
+| 320 | 0.6521 | 0.6482 | 0.6570 | **0.6842** |
+
+Trails `y26n_humanshaped_v2` by ~1.5–2 pts at every size (unfinished training); the INT8/D1 pattern is
+identical. Details + per-class: `experiments/EXP-2026-21-int8-output-quantization.md` addendum.
+

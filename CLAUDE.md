@@ -201,7 +201,10 @@ pod/RunPod/training-specific that isn't listed above.
   hasn't happened — local copies in `_smallperson_review/`, no pod needed.
 - Video temporal-flicker fix (dual-threshold sustain / sticky class vote, designed in EXP-11)
   has not been built or replayed against any candidate model yet.
-- **INT8 export: Child AP50 rises +3.7…+5.3 pts for the nano models under train-calibrated INT8**
-  (2026-09-09 matrix, `docs/MODEL_COMPARISON.md` last section) — unexplained; run the LAGENDA
-  classification sweep on the INT8 `.tflite` files to check it isn't adult→Child leak, and
-  re-sweep deployment thresholds per precision before shipping any INT8 file.
+- **INT8 export: the 640 loss is fixed but not yet shippable** (EXP-2026-21, 2026-09-11). W8A8 with
+  the head's decode ops left float (`vlm-cluster/float_head_quant.py`) matches or beats fp32 on
+  all three candidates. Before it replaces `int8=True` in `docs/DEPLOYMENT_MODELS_AND_PATHS.md`:
+  (1) ~~latency~~ done 2026-09-11: nano 22.9 vs 21.4 ms, y26s equal — keeps INT8 speed; (2) explain the
+  nano-only **+7-pt Child AP gain** that int8 head convs produce (present in INT8 and the fix,
+  absent when head convs are float) — run the LAGENDA classification sweep on those files to rule
+  out adult→Child leak; (3) re-sweep deployment thresholds per precision.
