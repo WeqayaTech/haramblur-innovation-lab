@@ -1728,3 +1728,80 @@ python3.12 -m venv ~/.venvs/litert_mac && ~/.venvs/litert_mac/bin/pip install ai
   --out models/bench_mac_20260915/bench_mac_m2.json --threads 1,4,8 --repeats 3
 python3 experiments/make_charts_bench_mac.py     # charts + SUMMARY.md, needs the merged bench_mac_m2_all.json
 ```
+
+## Per-class AP along the confidence threshold — Woman / Man / Child (2026-09-15)
+
+**Question (owner, 2026-09-15):** repeat the threshold sweep above, but with each class's **AP**
+as the metric. "AP at threshold t" = the AP `map_eval.py` would report if every detection with
+conf < t were deleted from the dumps first — how much of a class's AP survives at the operating
+point, per export precision. Same model (`y26n_humanshaped_v2`), same 19 cells and raw dumps as
+the recall/precision sweep (holdout 640/416/320 × {`.pt`, fp32 TFLite, FP16 @640, INT8 W8A8, INT8 +
+float decode}; Spotlight-val @640 incl. the whole-head-float variant).
+
+**Tool:** `vlm-cluster/ap_sweep.py` (new). Matching, ignore regions, per-image `max_dets=100` and
+the 101-point interpolation are `map_eval.py`'s; matching is done once per class × IoU threshold
+and the confidence threshold is applied as a prefix of the confidence-descending (conf, TP) rows —
+valid because greedy matching in descending confidence never lets a lower box change a higher
+one's outcome. **Every cell with an EXP-22 `_map.json` was `--crosscheck`ed: the no-threshold column
+equals `map_eval.py`'s per-class AP50/AP75/AP50-95 to 4 decimals (17/17 passed;** the two
+re-dumped Spotlight-val arms have no reference JSON). `--selftest` compares against
+`map_eval.ap_per_class` on filtered synthetic dumps. JSONs: `models/ap_sweep_20260915/`; charts
+(three panels per figure, AP50-95 solid, AP50 dashed): `experiments/assets/ap_sweep/<ds>_sz<SZ>.svg`;
+0.05-step tables for every cell: `experiments/assets/ap_sweep/SUMMARY.md`;
+generator `experiments/make_charts_ap_sweep.py`.
+
+`haramblur_holdout`, AP50-95 Woman / Man / Child — no threshold, then at 0.45, 0.55, 0.70:
+
+| px | precision / path | no threshold (= `map_eval`) | **@0.45** | @0.55 | @0.70 | max conf |
+|---|---|---|---|---|---|---|
+| 640 | fp32 `.pt` | 0.889 / 0.819 / 0.811 | **0.851 / 0.751 / 0.751** | 0.837 / 0.733 / 0.729 | 0.803 / 0.692 / 0.685 | 0.99 |
+| 640 | fp32 TFLite | 0.890 / 0.820 / 0.810 | 0.850 / 0.753 / 0.745 | 0.836 / 0.733 / 0.727 | 0.803 / 0.693 / 0.687 | 0.99 |
+| 640 | FP16 TFLite | 0.890 / 0.820 / 0.810 | 0.850 / 0.753 / 0.745 | 0.836 / 0.733 / 0.726 | 0.803 / 0.693 / 0.687 | 0.99 |
+| 640 | INT8 W8A8 | 0.824 / 0.749 / 0.764 | 0.782 / 0.687 / 0.709 | 0.740 / 0.602 / 0.685 | 0.711 / 0.582 / 0.658 | 0.860 |
+| 640 | **INT8 + float decode** | 0.882 / 0.821 / 0.822 | **0.843 / 0.750 / 0.765** | 0.795 / 0.656 / 0.735 | 0.765 / 0.634 / 0.704 | 0.726 |
+| 416 | fp32 `.pt` | 0.883 / 0.792 / 0.789 | **0.849 / 0.724 / 0.721** | 0.835 / 0.702 / 0.698 | 0.799 / 0.660 / 0.658 | 0.99 |
+| 416 | INT8 W8A8 | 0.850 / 0.754 / 0.765 | 0.808 / 0.686 / 0.702 | 0.711 / 0.549 / 0.653 | **0 / 0 / 0** | 0.572 |
+| 416 | **INT8 + float decode** | 0.881 / 0.793 / 0.799 | **0.845 / 0.724 / 0.737** | 0.737 / 0.572 / 0.685 | 0.713 / 0.554 / 0.655 | 0.707 |
+| 320 | fp32 `.pt` | 0.860 / 0.756 / 0.749 | **0.821 / 0.683 / 0.682** | 0.804 / 0.660 / 0.661 | 0.767 / 0.620 / 0.614 | 0.99 |
+| 320 | INT8 W8A8 | 0.833 / 0.736 / 0.731 | 0.788 / 0.662 / 0.662 | **0 / 0 / 0** | **0 / 0 / 0** | 0.500 |
+| 320 | **INT8 + float decode** | 0.861 / 0.759 / 0.759 | **0.816 / 0.686 / 0.692** | 0.688 / 0.509 / 0.601 | **0 / 0 / 0** | 0.694 |
+
+Spotlight-val @640, same columns: `.pt` 0.706 / 0.775 / 0.629 → @0.45 0.641 / 0.703 / 0.561; INT8
+W8A8 0.645 / 0.713 / 0.627 → 0.575 / 0.648 / 0.558; fix 0.711 / 0.781 / 0.697 → 0.640 / 0.712 /
+0.625; whole-head-float 0.690 / 0.773 / 0.628 → 0.621 / 0.698 / 0.553.
+
+**Reading it:**
+
+1. **At 0.45 the fix export keeps each class's AP within a point of fp32** — Woman −0.8, Man −0.1,
+   Child +1.4 pts AP50-95 at 640 (416: −0.4 / 0.0 / +1.6; 320: −0.5 / +0.3 / +1.0). Plain W8A8 is
+   6–7 pts down on Woman and Man at 640 (box tightness, EXP-21) — the same story as mAP, now per
+   class and at the operating point.
+2. **Above 0.45 the fix collapses faster than fp32, per class:** at 0.55 it is already −4.2 Woman /
+   −7.7 Man / +0.6 Child vs fp32 at 640, because everyone detected at P3/P4 is clamped at 0.500 and
+   disappears; Man suffers most (more small/medium men in the holdout's crowd scenes). At 416 the
+   W8A8 export is **zero for every class at 0.70**, at 320 it is zero at 0.55 and the fix at 0.70 —
+   the ceiling, seen as AP.
+3. **The Child AP gain is real at the operating point, not only as threshold-free mAP:** the fix
+   beats fp32 on Child at every threshold and size (+1.0 to +1.6 pts AP50-95 at 0.45 on the holdout,
+   +6.4 on Spotlight-val), while its Child *precision* is 4 pts lower at 0.45 (previous section).
+   AP rewards ranking: the extra Child boxes rank below the true children, so AP rises while
+   precision at a fixed cut falls. Both are true; the adult→Child direction (LAGENDA) is still owed.
+4. **Every class loses 4–7 pts AP50-95 just by applying 0.45** even at fp32 (Woman 0.889 → 0.851,
+   Man 0.819 → 0.751, Child 0.811 → 0.751): the low-confidence tail that mAP credits is gone in
+   deployment. Comparisons that matter for shipping are the @0.45 columns, not the mAP tables.
+5. fp32 TFLite and FP16 = `.pt` at every threshold (±0.002), as everywhere else.
+
+**What this does NOT show:** one model; AP-at-threshold is a ranking metric truncated at t, not
+what the user sees (that is recall/precision, previous section); no LAGENDA, no latency; the two
+re-dumped Spotlight-val arms are un-crosschecked (their fp32 siblings passed).
+
+```bash
+# one cell (pod), with the crosscheck against the EXP-22 scorer output:
+/usr/bin/python3.13 /workspace/data_inspection_tools/vlm-cluster/ap_sweep.py \
+  --raw /workspace/exp22/eval/y26n_humanshaped_v2_fdec_sz640_holdout/raw \
+  --gt-labels /workspace/datasets/haramblur_holdout/labeling/full/labels_eval \
+  --ignore-labels /workspace/datasets/haramblur_holdout/labeling/full/ignore --grid-step 0.05 \
+  --crosscheck /workspace/exp22/eval/y26n_humanshaped_v2_fdec_sz640_holdout_map.json \
+  --out /workspace/exp22/ap_sweep/y26n_humanshaped_v2_fdec_sz640_holdout.json
+# all 19 cells: /workspace/exp22/ap_sweep/run_ap_sweep.sh · charts: python3 experiments/make_charts_ap_sweep.py
+```

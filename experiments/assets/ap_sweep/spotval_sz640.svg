@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 520" font-family="system-ui,sans-serif">
+<rect width="1180" height="520" fill="white"/>
+<text x="590.0" y="30" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1a2e">y26n_humanshaped_v2 @640 — per-class AP vs confidence threshold, fp32 vs two INT8 exports</text>
+<text x="590.0" y="51" text-anchor="middle" font-size="12.5" fill="#7a7a8c">Spotlight-val (4,232 images) · AP at threshold t = map_eval.py AP with every detection below t deleted · solid = AP50-95, dashed = AP50 · vlm-cluster/ap_sweep.py, 0.05 grid</text>
+<rect x="70" y="95" width="300" height="300" fill="none" stroke="#e4e4ea"/>
+<line x1="70" y1="395.0" x2="370" y2="395.0" stroke="#e4e4ea"/>
+<text x="64" y="399.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.0</text>
+<line x1="70" y1="335.0" x2="370" y2="335.0" stroke="#e4e4ea"/>
+<text x="64" y="339.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.2</text>
+<line x1="70" y1="275.0" x2="370" y2="275.0" stroke="#e4e4ea"/>
+<text x="64" y="279.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.4</text>
+<line x1="70" y1="215.0" x2="370" y2="215.0" stroke="#e4e4ea"/>
+<text x="64" y="219.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.6</text>
+<line x1="70" y1="155.0" x2="370" y2="155.0" stroke="#e4e4ea"/>
+<text x="64" y="159.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.8</text>
+<line x1="70" y1="95.0" x2="370" y2="95.0" stroke="#e4e4ea"/>
+<text x="64" y="99.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">1.0</text>
+<line x1="70.0" y1="95" x2="70.0" y2="395" stroke="#e4e4ea"/>
+<text x="70.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.0</text>
+<line x1="130.0" y1="95" x2="130.0" y2="395" stroke="#e4e4ea"/>
+<text x="130.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.2</text>
+<line x1="190.0" y1="95" x2="190.0" y2="395" stroke="#e4e4ea"/>
+<text x="190.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.4</text>
+<line x1="250.0" y1="95" x2="250.0" y2="395" stroke="#e4e4ea"/>
+<text x="250.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.6</text>
+<line x1="310.0" y1="95" x2="310.0" y2="395" stroke="#e4e4ea"/>
+<text x="310.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.8</text>
+<line x1="370.0" y1="95" x2="370.0" y2="395" stroke="#e4e4ea"/>
+<text x="370.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">1.0</text>
+<text x="220.0" y="427" text-anchor="middle" font-size="11.5" fill="#1a1a2e">confidence threshold (detections below it deleted)</text>
+<text transform="translate(30,245.0) rotate(-90)" text-anchor="middle" font-size="11.5" fill="#1a1a2e">AP</text>
+<line x1="205.0" y1="95" x2="205.0" y2="395" stroke="#7a7a8c" stroke-dasharray="4 3"/>
+<text x="209.0" y="107" font-size="10" fill="#7a7a8c">shipped 0.45</text>
+<text x="70" y="87" font-size="13" font-weight="700" fill="#1a1a2e">Woman <tspan font-weight="400" fill="#7a7a8c">· 3,083 GT</tspan></text>
+<polyline points="85.0,185.6 100.0,187.3 115.0,189.2 130.0,190.6 145.0,192.6 160.0,193.9 175.0,196.7 190.0,199.4 205.0,202.8 220.0,206.2 235.0,211.5 250.0,218.2 265.0,224.7 280.0,234.1 295.0,244.9 310.0,260.1 325.0,281.9 340.0,317.3 355.0,363.1" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="85.0,151.2 100.0,153.3 115.0,155.5 130.0,157.8 145.0,160.3 160.0,162.7 175.0,165.2 190.0,170.3 205.0,172.9 220.0,178.1 235.0,186.1 250.0,194.3 265.0,202.5 280.0,213.5 295.0,227.5 310.0,247.3 325.0,273.0 340.0,313.2 355.0,362.6" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<polyline points="85.0,204.0 100.0,205.4 115.0,207.2 130.0,208.5 145.0,210.6 160.0,213.8 175.0,213.8 190.0,217.7 205.0,222.5 220.0,222.5 235.0,263.4 250.0,271.1 265.0,277.6 280.0,277.6 295.0,285.9 310.0,294.7 325.0,305.9 340.0,395.0 355.0,395.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="85.0,152.8 100.0,152.8 115.0,157.1 130.0,159.3 145.0,161.7 160.0,166.6 175.0,166.6 190.0,171.5 205.0,179.3 220.0,179.3 235.0,236.1 250.0,246.8 265.0,254.9 280.0,254.9 295.0,266.0 310.0,279.9 325.0,294.0 340.0,395.0 355.0,395.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<line x1="328.1" y1="95" x2="328.1" y2="395" stroke="#eb6834" stroke-width="1" stroke-dasharray="2 3"/>
+<polyline points="85.0,184.3 100.0,186.3 115.0,188.0 130.0,189.4 145.0,191.5 160.0,193.6 175.0,196.7 190.0,197.5 205.0,203.0 220.0,204.7 235.0,248.2 250.0,255.6 265.0,255.6 280.0,263.1 295.0,395.0 310.0,395.0 325.0,395.0 340.0,395.0 355.0,395.0" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="85.0,152.2 100.0,154.2 115.0,156.4 130.0,158.7 145.0,161.1 160.0,163.6 175.0,168.6 190.0,168.6 205.0,176.4 220.0,179.0 235.0,233.3 250.0,241.4 265.0,241.4 280.0,252.4 295.0,395.0 310.0,395.0 325.0,395.0 340.0,395.0 355.0,395.0" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<line x1="287.8" y1="95" x2="287.8" y2="395" stroke="#1baf7a" stroke-width="1" stroke-dasharray="2 3"/>
+<text x="74" y="373" font-size="10.5" fill="#1a1a2e">AP50-95 @0.45: 0.641 / 0.575 / 0.640</text>
+<text x="74" y="387" font-size="10.5" fill="#7a7a8c">no threshold (map_eval): 0.706 / 0.645 / 0.711</text>
+<rect x="440" y="95" width="300" height="300" fill="none" stroke="#e4e4ea"/>
+<line x1="440" y1="395.0" x2="740" y2="395.0" stroke="#e4e4ea"/>
+<text x="434" y="399.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.0</text>
+<line x1="440" y1="335.0" x2="740" y2="335.0" stroke="#e4e4ea"/>
+<text x="434" y="339.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.2</text>
+<line x1="440" y1="275.0" x2="740" y2="275.0" stroke="#e4e4ea"/>
+<text x="434" y="279.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.4</text>
+<line x1="440" y1="215.0" x2="740" y2="215.0" stroke="#e4e4ea"/>
+<text x="434" y="219.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.6</text>
+<line x1="440" y1="155.0" x2="740" y2="155.0" stroke="#e4e4ea"/>
+<text x="434" y="159.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.8</text>
+<line x1="440" y1="95.0" x2="740" y2="95.0" stroke="#e4e4ea"/>
+<text x="434" y="99.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">1.0</text>
+<line x1="440.0" y1="95" x2="440.0" y2="395" stroke="#e4e4ea"/>
+<text x="440.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.0</text>
+<line x1="500.0" y1="95" x2="500.0" y2="395" stroke="#e4e4ea"/>
+<text x="500.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.2</text>
+<line x1="560.0" y1="95" x2="560.0" y2="395" stroke="#e4e4ea"/>
+<text x="560.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.4</text>
+<line x1="620.0" y1="95" x2="620.0" y2="395" stroke="#e4e4ea"/>
+<text x="620.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.6</text>
+<line x1="680.0" y1="95" x2="680.0" y2="395" stroke="#e4e4ea"/>
+<text x="680.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.8</text>
+<line x1="740.0" y1="95" x2="740.0" y2="395" stroke="#e4e4ea"/>
+<text x="740.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">1.0</text>
+<text x="590.0" y="427" text-anchor="middle" font-size="11.5" fill="#1a1a2e">confidence threshold (detections below it deleted)</text>
+<text transform="translate(400,245.0) rotate(-90)" text-anchor="middle" font-size="11.5" fill="#1a1a2e">AP</text>
+<line x1="575.0" y1="95" x2="575.0" y2="395" stroke="#7a7a8c" stroke-dasharray="4 3"/>
+<text x="579.0" y="107" font-size="10" fill="#7a7a8c">shipped 0.45</text>
+<text x="440" y="87" font-size="13" font-weight="700" fill="#1a1a2e">Man <tspan font-weight="400" fill="#7a7a8c">· 3,762 GT</tspan></text>
+<polyline points="455.0,165.7 470.0,167.7 485.0,169.9 500.0,172.8 515.0,174.7 530.0,177.1 545.0,179.6 560.0,181.6 575.0,184.2 590.0,188.2 605.0,191.4 620.0,195.9 635.0,199.8 650.0,204.5 665.0,212.2 680.0,219.0 695.0,231.0 710.0,247.7 725.0,284.0" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="455.0,141.3 470.0,145.2 485.0,147.3 500.0,152.0 515.0,154.4 530.0,157.0 545.0,162.1 560.0,164.8 575.0,167.5 590.0,172.9 605.0,178.4 620.0,184.0 635.0,189.7 650.0,195.3 665.0,203.9 680.0,212.5 695.0,227.1 710.0,244.6 725.0,282.7" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<polyline points="455.0,184.3 470.0,185.3 485.0,187.2 500.0,189.2 515.0,191.0 530.0,193.8 545.0,193.8 560.0,197.6 575.0,200.6 590.0,200.6 605.0,218.6 620.0,222.7 635.0,226.6 650.0,226.6 665.0,231.4 680.0,236.9 695.0,243.5 710.0,395.0 725.0,395.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="455.0,143.4 470.0,145.2 485.0,147.3 500.0,149.5 515.0,151.8 530.0,156.7 545.0,156.7 560.0,161.8 575.0,167.1 590.0,167.1 605.0,194.6 620.0,200.2 635.0,205.8 650.0,205.8 665.0,211.5 680.0,220.0 695.0,228.7 710.0,395.0 725.0,395.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<line x1="698.1" y1="95" x2="698.1" y2="395" stroke="#eb6834" stroke-width="1" stroke-dasharray="2 3"/>
+<polyline points="455.0,163.6 470.0,165.5 485.0,166.9 500.0,169.1 515.0,171.7 530.0,174.6 545.0,177.6 560.0,179.1 575.0,181.4 590.0,182.4 605.0,202.1 620.0,206.2 635.0,206.2 650.0,211.1 665.0,395.0 680.0,395.0 695.0,395.0 710.0,395.0 725.0,395.0" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="455.0,139.5 470.0,141.4 485.0,143.5 500.0,148.0 515.0,150.4 530.0,155.4 545.0,157.9 560.0,160.5 575.0,165.9 590.0,165.9 605.0,190.7 620.0,196.3 635.0,196.3 650.0,201.9 665.0,395.0 680.0,395.0 695.0,395.0 710.0,395.0 725.0,395.0" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<line x1="657.8" y1="95" x2="657.8" y2="395" stroke="#1baf7a" stroke-width="1" stroke-dasharray="2 3"/>
+<text x="444" y="373" font-size="10.5" fill="#1a1a2e">AP50-95 @0.45: 0.703 / 0.648 / 0.712</text>
+<text x="444" y="387" font-size="10.5" fill="#7a7a8c">no threshold (map_eval): 0.775 / 0.713 / 0.781</text>
+<rect x="810" y="95" width="300" height="300" fill="none" stroke="#e4e4ea"/>
+<line x1="810" y1="395.0" x2="1110" y2="395.0" stroke="#e4e4ea"/>
+<text x="804" y="399.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.0</text>
+<line x1="810" y1="335.0" x2="1110" y2="335.0" stroke="#e4e4ea"/>
+<text x="804" y="339.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.2</text>
+<line x1="810" y1="275.0" x2="1110" y2="275.0" stroke="#e4e4ea"/>
+<text x="804" y="279.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.4</text>
+<line x1="810" y1="215.0" x2="1110" y2="215.0" stroke="#e4e4ea"/>
+<text x="804" y="219.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.6</text>
+<line x1="810" y1="155.0" x2="1110" y2="155.0" stroke="#e4e4ea"/>
+<text x="804" y="159.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.8</text>
+<line x1="810" y1="95.0" x2="1110" y2="95.0" stroke="#e4e4ea"/>
+<text x="804" y="99.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">1.0</text>
+<line x1="810.0" y1="95" x2="810.0" y2="395" stroke="#e4e4ea"/>
+<text x="810.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.0</text>
+<line x1="870.0" y1="95" x2="870.0" y2="395" stroke="#e4e4ea"/>
+<text x="870.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.2</text>
+<line x1="930.0" y1="95" x2="930.0" y2="395" stroke="#e4e4ea"/>
+<text x="930.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.4</text>
+<line x1="990.0" y1="95" x2="990.0" y2="395" stroke="#e4e4ea"/>
+<text x="990.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.6</text>
+<line x1="1050.0" y1="95" x2="1050.0" y2="395" stroke="#e4e4ea"/>
+<text x="1050.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">0.8</text>
+<line x1="1110.0" y1="95" x2="1110.0" y2="395" stroke="#e4e4ea"/>
+<text x="1110.0" y="410" text-anchor="middle" font-size="10.5" fill="#7a7a8c">1.0</text>
+<text x="960.0" y="427" text-anchor="middle" font-size="11.5" fill="#1a1a2e">confidence threshold (detections below it deleted)</text>
+<text transform="translate(770,245.0) rotate(-90)" text-anchor="middle" font-size="11.5" fill="#1a1a2e">AP</text>
+<line x1="945.0" y1="95" x2="945.0" y2="395" stroke="#7a7a8c" stroke-dasharray="4 3"/>
+<text x="949.0" y="107" font-size="10" fill="#7a7a8c">shipped 0.45</text>
+<text x="810" y="87" font-size="13" font-weight="700" fill="#1a1a2e">Child <tspan font-weight="400" fill="#7a7a8c">· 1,190 GT</tspan></text>
+<polyline points="825.0,210.9 840.0,212.9 855.0,214.3 870.0,215.2 885.0,217.2 900.0,219.5 915.0,220.2 930.0,223.0 945.0,226.8 960.0,229.7 975.0,234.6 990.0,238.3 1005.0,243.7 1020.0,249.2 1035.0,253.6 1050.0,260.6 1065.0,270.9 1080.0,293.5 1095.0,329.8" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="825.0,180.6 840.0,184.0 855.0,184.0 870.0,186.0 885.0,190.0 900.0,192.1 915.0,194.2 930.0,198.5 945.0,202.9 960.0,207.3 975.0,214.1 990.0,218.8 1005.0,225.9 1020.0,233.1 1035.0,240.5 1050.0,248.1 1065.0,261.0 1080.0,287.0 1095.0,327.4" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<polyline points="825.0,210.5 840.0,212.3 855.0,214.8 870.0,215.6 885.0,217.3 900.0,220.4 915.0,220.4 930.0,223.1 945.0,227.5 960.0,227.5 975.0,235.9 990.0,240.8 1005.0,245.1 1020.0,245.1 1035.0,252.6 1050.0,258.9 1065.0,267.3 1080.0,395.0 1095.0,395.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="825.0,164.8 840.0,168.0 855.0,171.6 870.0,171.6 885.0,175.5 900.0,179.5 915.0,179.5 930.0,183.7 945.0,190.2 960.0,190.2 975.0,204.1 990.0,211.2 1005.0,216.0 1020.0,216.0 1035.0,228.6 1050.0,236.3 1065.0,249.5 1080.0,395.0 1095.0,395.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<line x1="1068.1" y1="95" x2="1068.1" y2="395" stroke="#eb6834" stroke-width="1" stroke-dasharray="2 3"/>
+<polyline points="825.0,190.6 840.0,193.2 855.0,194.0 870.0,195.4 885.0,197.1 900.0,198.5 915.0,201.5 930.0,201.9 945.0,207.5 960.0,207.7 975.0,215.2 990.0,219.8 1005.0,219.8 1020.0,226.0 1035.0,395.0 1050.0,395.0 1065.0,395.0 1080.0,395.0 1095.0,395.0" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="825.0,160.6 840.0,165.6 855.0,165.6 870.0,167.4 885.0,169.3 900.0,171.3 915.0,175.3 930.0,177.3 945.0,183.6 960.0,185.7 975.0,194.5 990.0,201.4 1005.0,201.4 1020.0,210.8 1035.0,395.0 1050.0,395.0 1065.0,395.0 1080.0,395.0 1095.0,395.0" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<line x1="1027.8" y1="95" x2="1027.8" y2="395" stroke="#1baf7a" stroke-width="1" stroke-dasharray="2 3"/>
+<text x="814" y="373" font-size="10.5" fill="#1a1a2e">AP50-95 @0.45: 0.561 / 0.558 / 0.625</text>
+<text x="814" y="387" font-size="10.5" fill="#7a7a8c">no threshold (map_eval): 0.629 / 0.627 / 0.697</text>
+<line x1="70" y1="451" x2="92" y2="451" stroke="#2a78d6" stroke-width="2.5"/>
+<text x="98" y="455" font-size="11.5" fill="#1a1a2e">fp32 .pt (reference)</text>
+<line x1="320" y1="451" x2="342" y2="451" stroke="#eb6834" stroke-width="2.5"/>
+<text x="348" y="455" font-size="11.5" fill="#1a1a2e">INT8 W8A8 TFLite</text>
+<line x1="570" y1="451" x2="592" y2="451" stroke="#1baf7a" stroke-width="2.5"/>
+<text x="598" y="455" font-size="11.5" fill="#1a1a2e">INT8 + float decode ops (fix)</text>
+<line x1="820" y1="451" x2="842" y2="451" stroke="#1a1a2e" stroke-width="2"/><text x="848" y="455" font-size="11.5" fill="#1a1a2e">AP50-95</text>
+<line x1="915" y1="451" x2="937" y2="451" stroke="#1a1a2e" stroke-width="2" stroke-dasharray="5 4"/><text x="943" y="455" font-size="11.5" fill="#1a1a2e">AP50</text>
+<text x="70" y="475" font-size="11" fill="#7a7a8c">Dotted verticals: the highest confidence any box of that class reaches in the INT8 export — above it the class has no detections and AP is 0.</text>
+</svg>
