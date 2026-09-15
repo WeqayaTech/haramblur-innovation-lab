@@ -1484,3 +1484,170 @@ sha `edd694c08585af1c…`), mAP50-95 Spotlight-val:
 Trails `y26n_humanshaped_v2` by ~1.5–2 pts at every size (unfinished training); the INT8/D1 pattern is
 identical. Details + per-class: `experiments/EXP-2026-21-int8-output-quantization.md` addendum.
 
+## Precision × resolution × dataset matrix, with the production model (EXP-2026-22, 2026-09-14)
+
+150 cells: `yolo11N-640` + the four YOLO26 candidates × {fp32 `.pt`, fp32 TFLite, FP16, INT8 W8A8,
+INT8 + float-decode fix} × {640, 416, 320} × {Spotlight-val, `haramblur_holdout`}. One scorer,
+one code path, 0 sanity flags. Rendered: artifact `258b61fe` (interactive tables); write-up with
+the pre-registered scorecard: `experiments/EXP-2026-22-precision-matrix.md`; JSONs:
+`models/exp22_20260914/eval/`.
+
+Holdout pooled mAP50-95 @640 (`.pt` → INT8 → fix): production **0.7414 → 0.7150 → 0.7631**;
+`y26n_humanshaped_v2` 0.8399 → 0.7788 → 0.8416; `y26n_noe2e_warm50-2` 0.8353 → 0.7839 → 0.8383;
+`y26s_humanshaped_smallpatch_v1` 0.8700 → 0.8057 → 0.8690; `y26n_humanshaped_v2_distill_v1` (ep 61)
+0.8276 → 0.7770 → 0.8289. Per-collection dominant-class AP and the `randoms` false-blur arm are in
+the EXP file. Three things this settles: the EXP-21 INT8 loss (−5…−6 pts @640) reproduces on the
+QA set and the fix erases it there too; every candidate beats production on every collection and on
+person-free false blurs (4.3–5.1 % vs 7.0 %); the Spotlight-val Child gain is mostly a label-set
+effect (+1 pt on the holdout `child` collection instead of +7).
+
+**Deployment reading:** the float-decode INT8 export is now the best file at every size for every
+model on both datasets — INT8 size and speed, `.pt` accuracy. Remaining gate before it replaces
+plain INT8 in `docs/DEPLOYMENT_MODELS_AND_PATHS.md`: the LAGENDA classification sweep on the fixed
+files (adult→Child direction) and a per-precision threshold re-sweep.
+
+**Latency, measured uniformly 2026-09-14** (`bench_matrix.py`, one 8-vCPU EPYC pod, 1 thread,
+median ms fp32 / INT8 / fix): production @640 29.5 / 14.5 / 14.5; `y26n_humanshaped_v2` @640
+26.1 / 16.6 / 16.6, @416 10.6 / 4.7 / 5.0, @320 6.2 / 2.6 / 2.6; `y26s_humanshaped_smallpatch_v1`
+@640 87.7 / 40.9 / 41.0, @416 36.4 / 13.2 / 12.8. The fix is free over INT8; FP16 = fp32 speed;
+INT8 = 1.6–2.8× fp32. This supersedes every earlier ad-hoc `bench_tflite.py` number (different
+pods, single runs). Full table incl. 4-thread and repeat spread: the EXP-22 file / report page.
+
+
+## Threshold vs recall/precision across export precisions — the INT8 confidence ceiling (2026-09-14)
+
+**Question:** for `y26n_humanshaped_v2`, does the confidence-threshold → recall/precision curve
+survive quantization — i.e. can a threshold chosen on the fp32 checkpoint be reused on the INT8
+exports? Two quantizations: **INT8 W8A8** (`int8=True`, calib500) and **INT8 + float decode ops**
+(the EXP-2026-21 fix, `float_head_quant.py`). fp32 TFLite and FP16 are included as controls.
+
+**Method (offline, no inference for 17 of 19 cells):** `vlm-cluster/pr_curve.py --grid-step 0.01
+--agnostic --iou 0.5` replayed on the floor-0.001 raw dumps already on the volume from EXP-2026-22
+(`/workspace/exp22/eval/<run>_<tag>_sz<SZ>_holdout/raw`, every cell asserted `n_images=11494`) and
+the 2026-09-09 matrix (`/workspace/quant_matrix_calib500/…_sz640_spotval/raw`, `n_images=4232`).
+Real FP-based precision (any box not on a correct-class GT and not in an ignore region is an FP),
+same matching as every AP number in this file. The "any person" curve merges the three classes
+after a class-agnostic NMS at IoU 0.7 (so a second box of another class on the same person is a
+duplicate, not an FP). The two Spotlight-val arms whose raw dumps had been deleted in the EXP-22
+quota cleanup (fix, whole-head-float) were re-dumped with `run_ultralytics_labels.py` on CPU.
+Charts (one figure per file, recall / precision / magnified INT8−fp32 delta):
+`experiments/assets/pr_quant/<dataset>_sz<SZ>_{agnostic,Woman,Man,Child}.svg`; 0.05-step tables
+for every cell: `experiments/assets/pr_quant/SUMMARY.md`; raw curves + 0.01-step tables:
+`models/pr_quant_20260914/*.json`; pod: `/workspace/exp22/pr_quant/`.
+
+### At the shipped threshold (0.45) quantization is nearly invisible
+
+`haramblur_holdout`, 16,139 GT people, recall / precision at conf ≥ 0.45:
+
+| imgsz | precision / path | any person | Woman | Man | Child |
+|---|---|---|---|---|---|
+| 640 | fp32 `.pt` | 0.884 / 0.966 | 0.893 / 0.955 | 0.839 / 0.927 | 0.831 / 0.880 |
+| 640 | fp32 TFLite | 0.884 / 0.968 | 0.890 / 0.952 | 0.842 / 0.930 | 0.827 / 0.879 |
+| 640 | FP16 TFLite | 0.884 / 0.967 | 0.890 / 0.952 | 0.841 / 0.930 | 0.827 / 0.879 |
+| 640 | INT8 W8A8 | 0.878 / 0.950 | 0.879 / 0.943 | 0.833 / 0.897 | 0.835 / 0.832 |
+| 640 | **INT8 + float decode (fix)** | **0.883 / 0.967** | 0.885 / 0.952 | 0.835 / 0.926 | 0.841 / 0.840 |
+| 416 | fp32 `.pt` | 0.867 / 0.968 | 0.895 / 0.947 | 0.814 / 0.928 | 0.799 / 0.917 |
+| 416 | INT8 W8A8 | 0.861 / 0.964 | 0.886 / 0.947 | 0.807 / 0.920 | 0.804 / 0.887 |
+| 416 | **INT8 + float decode (fix)** | **0.869 / 0.964** | 0.891 / 0.944 | 0.818 / 0.921 | 0.810 / 0.882 |
+| 320 | fp32 `.pt` | 0.843 / 0.967 | 0.878 / 0.934 | 0.778 / 0.921 | 0.760 / 0.919 |
+| 320 | INT8 W8A8 | 0.833 / 0.964 | 0.865 / 0.938 | 0.771 / 0.921 | 0.759 / 0.907 |
+| 320 | **INT8 + float decode (fix)** | **0.843 / 0.966** | 0.871 / 0.938 | 0.782 / 0.920 | 0.766 / 0.893 |
+
+Spotlight-val @640, any person @0.45: fp32 `.pt` 0.833 / 0.965 · fp32 TFLite 0.834 / 0.965 ·
+FP16 0.834 / 0.965 · INT8 W8A8 0.824 / 0.946 · fix 0.834 / 0.962 · whole-head-float (EXP-21 D2,
+`fhead_all`, re-dumped) 0.826 / 0.966.
+
+- **The fix export reproduces fp32 at 0.45 within 0.1 pt any-person recall and 0.1 pt precision
+  at every size**; plain W8A8 costs 0.6–1.0 pt recall and 0.3–1.6 pt precision. fp32 TFLite and
+  FP16 are the `.pt` to three decimals (as in every previous section).
+- **Child precision is the one per-class casualty: −4 to −5 pts under both INT8 exports at 640**
+  (0.880 → 0.832 / 0.840) while Child recall rises ~1 pt. INT8 writes *more* Child boxes and a
+  larger share of them are wrong — this is the same phenomenon as the Spotlight-val "Child AP
+  gain", seen from the precision side, and it is in the adult-escape direction (a wrong Child box
+  is most often an adult). Which adults, and how many, is still the LAGENDA-sweep open item.
+- Over the whole range **below** 0.45 (thr 0.05–0.45, any person) the fix stays within 0.7 pt
+  recall / 1.5 pt precision of fp32 at every size; W8A8 within 1.1 pt recall but up to 6.8 pt
+  precision (it is noisier at low thresholds).
+
+### But the threshold axis itself does not survive quantization
+
+The curves are not smooth lines: **INT8 confidences sit on a coarse ladder and stop at a hard
+ceiling** — above it the export returns no boxes at all, for every class:
+
+| export | max confidence any box reaches @640 | @416 | @320 | distinct values above 0.42 @640 |
+|---|---|---|---|---|
+| fp32 `.pt` / fp32 TFLite / FP16 | 0.989–0.990 | 0.990 | 0.990 | thousands |
+| INT8 W8A8 | **0.860** | **0.572** | **0.500** | 8 (0.426 0.501 0.572 0.647 0.714 0.773 0.819 0.860) |
+| INT8 + float decode (fix) | **0.726** | **0.707** | **0.694** | 7 (0.42 0.44 0.47 0.500 0.580 0.657 0.726) |
+
+So on the holdout at 640 the fix export's any-person recall is 0.879 at thr 0.50, 0.783 at 0.55,
+0.766 at 0.65, and **0.000 at 0.75**; plain W8A8 at 320 has *nothing* above 0.50. A threshold
+moved to 0.55 "for fewer false blurs" would silently drop 10 pts of recall on the fix export
+(0.856 fp32 vs 0.783), and at 416/320 the W8A8 export would go blank. The `SUMMARY.md` tables
+show the staircase at every 0.05 step.
+
+**Mechanism, read off the export files** (`vlm-cluster/tflite_tensor_inspect.py` + a tensor
+listing, LiteRT 2.2.0):
+
+- W8A8 @640: the concatenated class-logit tensor `[1,3,8400]` is int8, scale **0.305 logits per
+  step**, zero-point 120 → representable logits −75.6 … +2.13. The calibration range is set by the
+  very negative background logits, so the positive side gets ~7 steps and the sigmoid output can
+  never exceed ≈0.89 (observed 0.860 after the output re-quantization at scale 0.00418).
+- Fix @640: the decode ops are float (that is what the fix does), but the three per-level class
+  convs feeding them are still int8 with **zero-point 127 (P3, P4) and 124 (P5)**, scales 0.122 /
+  0.169 / 0.325: max representable logit **0.0 / 0.0 / +0.97** → confidence **≤ 0.500 for anyone
+  detected at P3/P4 (small and medium people) and ≤ 0.726 at P5.** The exact 0.500 in the ladder
+  above is that clamp. This is why the fix's mAP was fine (mAP ranks within the file) while its
+  usable threshold range is narrower than plain W8A8's.
+- Per-tensor min/max calibration cannot fix this: the range is dominated by background logits of
+  −30 … −75 that carry no information.
+- **Direct evidence the remedy works:** the EXP-21 whole-head-float variant (`fhead_all`, every
+  head conv float) has **no ceiling** — max confidence 0.990, thousands of distinct values, any-person
+  recall on Spotlight-val 0.776 / 0.622 / 0.398 at thr 0.55 / 0.75 / 0.90 vs fp32 0.786 / 0.636 /
+  0.412 (max gap 2.5 pts anywhere up to 0.95). It pays 3.2 pts mAP50-95 for floating the box
+  convs as well (0.6972 vs 0.7296, EXP-21 table above), which the class-conv-only variant below
+  should not.
+
+### What this does NOT show
+
+- One model. The nano sibling and `y26s_humanshaped_smallpatch_v1` share the head, so the same
+  ceiling is expected but was not measured here; `yolo11N-640`'s DFL head is different.
+- No latency and no LAGENDA numbers — this is a detection-side sweep on the two datasets that had
+  every precision's raw dumps. It does not say which adults are behind the Child-precision drop.
+- The ceiling values are specific to the `calib_train500.txt` calibration draw; another draw would
+  move them by a step or two, not remove them.
+- Nothing here re-opens the mAP results in the sections above: they stand, and they are exactly the
+  numbers that could not see this.
+
+### Consequence for the INT8 export gate
+
+Before the fix export replaces plain INT8 in `docs/DEPLOYMENT_MODELS_AND_PATHS.md`, the class
+logits have to leave int8 too. Candidate (untested): add
+`.*Sequential_[0-2]/torch.nn.modules.conv.Conv2d_2;.*` (the three 3-channel class convs — negligible
+compute) to `float_head_quant.py --head-regex`, re-export, and re-run this sweep; the acceptance
+bar is "max confidence ≥ 0.98 and every 0.05-step recall/precision within 1 pt of fp32 up to 0.95".
+Until then: **the shipped 0.45 is safe on both INT8 exports, and any threshold ≥ 0.50 is not.**
+
+### Verify it yourself (verbatim)
+
+```bash
+# offline replay of the EXP-22 dumps (pod), one cell:
+python3 /workspace/data_inspection_tools/vlm-cluster/pr_curve.py \
+  --raw /workspace/exp22/eval/y26n_humanshaped_v2_fdec_sz640_holdout/raw \
+  --gt-labels /workspace/datasets/haramblur_holdout/labeling/full/labels_eval \
+  --ignore-labels /workspace/datasets/haramblur_holdout/labeling/full/ignore \
+  --iou 0.5 --grid-step 0.01 --agnostic \
+  --out /workspace/exp22/pr_quant/y26n_humanshaped_v2_fdec_sz640_holdout.json
+# all 19 cells: /workspace/exp22/pr_quant/run_pr_quant.sh (+ run_spotval_dumps.sh for the two re-dumped arms)
+# tensor scales / zero-points:
+/root/venvs/litert/bin/python /workspace/data_inspection_tools/vlm-cluster/tflite_tensor_inspect.py \
+  /workspace/exports/y26n_humanshaped_v2_calib500/sz640/y26n_humanshaped_v2_int8.tflite \
+  /workspace/exp21/exports/y26n_humanshaped_v2/y26n_humanshaped_v2_fhead_decode_out.tflite
+# charts + tables (local, no pod):
+python3 experiments/make_charts_pr_quant.py
+```
+
+Thresholds: IoU 0.5 for matching (`--iou`), ignore IoA ≥ 0.5 (`map_eval.IGNORE_IOA`), class-agnostic
+NMS IoU 0.7 (`pr_curve.NMS_IOU`, = the runner's `--iou` default), raw floor 0.001 (the dumps'
+`--floor`), grid 0.01 (`--grid-step`). "Ceiling" = the confidence of the first point of the
+confidence-descending curve (`curve[0].conf`).

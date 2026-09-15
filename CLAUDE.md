@@ -41,7 +41,7 @@ open.
 
 ## Current state (edit this in place — do not append a new dated block, update the facts)
 
-*Last updated: 2026-09-09.*
+*Last updated: 2026-09-14 (evening).*
 
 - **Best measured model:** `y26s_humanshaped_smallpatch_v1` —
   `/workspace/exp20/train/y26s_humanshaped_smallpatch_v1/weights/best.pt`. Best on
@@ -53,9 +53,14 @@ open.
   `/workspace/model_v2/dataset_v2/yolo11N-640/weights/best.pt`. Worst small-person recall and
   highest object-set FP rate of any model measured — the gap this whole model-eval line exists
   to close. Full comparison: `docs/MODEL_COMPARISON.md`.
-- **Latest completed experiment:** EXP-2026-20 (humanshaped labeling policy + the model above;
-  its LAGENDA claim was retracted 2026-09-09, see correction note in the doc itself).
-  Full index: `docs/EXPERIMENT_LOG.md`.
+- **Latest completed experiments:** EXP-2026-21 (why INT8 loses at 640 → the float-decode
+  export fix), EXP-2026-22 (the full precision × resolution matrix incl. the production model
+  on both Spotlight-val and the QA holdout — every candidate beats production everywhere; the
+  fixed INT8 export is the best file at every size), and the 2026-09-14 threshold sweep across
+  precisions (`y26n_humanshaped_v2`: at the shipped 0.45 quantization is invisible, but **both
+  INT8 exports have a hard confidence ceiling** — 0.86 W8A8 / 0.73 fix at 640, lower at 416/320 —
+  above which they return nothing; see `docs/MODEL_COMPARISON.md`, last section). Full index:
+  `docs/EXPERIMENT_LOG.md`.
 - **Primary training data:** Spotlight-labeled full OIV7 train split (1.19M kept people) —
   `docs/SPOTLIGHT_PRODUCTION_RUN.md`. Primary eval sets: `haramblur_holdout` (QA/deploy
   comparisons, incl. the Gulf-dress slice), LAGENDA v2 + `fl1199` (human-labelled 3-way),
@@ -207,4 +212,11 @@ pod/RunPod/training-specific that isn't listed above.
   (1) ~~latency~~ done 2026-09-11: nano 22.9 vs 21.4 ms, y26s equal — keeps INT8 speed; (2) explain the
   nano-only **+7-pt Child AP gain** that int8 head convs produce (present in INT8 and the fix,
   absent when head convs are float) — run the LAGENDA classification sweep on those files to rule
-  out adult→Child leak; (3) re-sweep deployment thresholds per precision.
+  out adult→Child leak (the 2026-09-14 threshold sweep adds a pointer: Child *precision* drops 4–5
+  pts under both INT8 exports at 0.45 while Child recall rises); (3) ~~re-sweep deployment
+  thresholds per precision~~ done 2026-09-14 — 0.45 is safe on both INT8 exports, **anything ≥ 0.50
+  is not**: INT8 confidences are a coarse ladder with a hard ceiling (fix export: 0.726 at 640,
+  and exactly 0.500 for small/medium people, because the three class-logit convs are still int8
+  with zero-point 127). New blocker (4): float the class convs too (`float_head_quant.py
+  --head-regex` + `.*Sequential_[0-2]/torch.nn.modules.conv.Conv2d_2;.*`, untested), re-export,
+  re-run `pr_curve.py` (bar: max conf ≥ 0.98, every 0.05 step within 1 pt of fp32 up to 0.95).

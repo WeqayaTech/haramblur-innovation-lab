@@ -24,7 +24,7 @@ classification accuracy (mAP50 flat or up for the nanos); it costs box tightness
 > loss (int8 resolution in the head's decode ops) and a fix that keeps every conv int8 but leaves
 > 31 decode tensors float: `vlm-cluster/float_head_quant.py`. At 640 it scores 0.7296 / 0.7174 /
 > 0.7706 mAP50-95 vs INT8 0.6615 / 0.6544 / 0.7019 (fp32 0.7037 / 0.7014 / 0.7682), +5 % file size.
-> Latency measured 2026-09-11: it keeps INT8 speed (nano 22.9 vs 21.4 ms, y26s 46.6 vs 46.7). Its nano-only Child AP gain is **not yet explained**, so the
+> Latency (uniform bench 2026-09-14, 1 thread): the fix costs nothing over INT8 at any size (nano @416 ≈ 5 ms; y26s @416 ≈ 13 ms) and INT8 is 1.6–2.8× faster than fp32/FP16. Its Child AP gain shrank to ~+1 pt on the QA holdout (EXP-22) but the LAGENDA direction check is still owed, so the
 > recommendation below stands until both are done (`CLAUDE.md` open items). Do not ship plain
 > `int8=True` at 640.
 
