@@ -59,7 +59,9 @@ open.
   fixed INT8 export is the best file at every size), and the 2026-09-14 threshold sweep across
   precisions (`y26n_humanshaped_v2`: at the shipped 0.45 quantization is invisible, but **both
   INT8 exports have a hard confidence ceiling** — 0.86 W8A8 / 0.73 fix at 640, lower at 416/320 —
-  above which they return nothing; see `docs/MODEL_COMPARISON.md`, last section). Full index:
+  above which they return nothing), and the 2026-09-15 Apple-silicon latency bench (M2: INT8 is
+  2.8–4.0× faster than fp32, vs 1.6–3.0× on the pod; 4 threads is the sweet spot; CPU-only, not the
+  TF.js path). Both in `docs/MODEL_COMPARISON.md`, last two sections. Full index:
   `docs/EXPERIMENT_LOG.md`.
 - **Primary training data:** Spotlight-labeled full OIV7 train split (1.19M kept people) —
   `docs/SPOTLIGHT_PRODUCTION_RUN.md`. Primary eval sets: `haramblur_holdout` (QA/deploy

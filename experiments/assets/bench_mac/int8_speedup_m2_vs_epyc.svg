@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 460" font-family="system-ui,sans-serif">
+<rect width="1180" height="460" fill="white"/>
+<text x="590.0" y="30" text-anchor="middle" font-size="19" font-weight="700" fill="#1a1a2e">INT8 speed-up over fp32 — this Mac (M2) vs the pod (EPYC 9655P), 1 thread</text>
+<text x="590.0" y="51" text-anchor="middle" font-size="12.5" fill="#7a7a8c">ratio = fp32 median ms ÷ INT8 W8A8 median ms, same file, same method on both machines · above 1 = INT8 faster</text>
+<rect x="70" y="90" width="1060" height="280" fill="none" stroke="#e4e4ea"/>
+<line x1="70" y1="370.0" x2="1130" y2="370.0" stroke="#e4e4ea"/>
+<text x="64" y="374.0" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.0×</text>
+<line x1="70" y1="339.7" x2="1130" y2="339.7" stroke="#e4e4ea"/>
+<text x="64" y="343.7" text-anchor="end" font-size="10.5" fill="#7a7a8c">0.5×</text>
+<line x1="70" y1="309.5" x2="1130" y2="309.5" stroke="#e4e4ea"/>
+<text x="64" y="313.5" text-anchor="end" font-size="10.5" fill="#7a7a8c">1.0×</text>
+<line x1="70" y1="279.2" x2="1130" y2="279.2" stroke="#e4e4ea"/>
+<text x="64" y="283.2" text-anchor="end" font-size="10.5" fill="#7a7a8c">1.5×</text>
+<line x1="70" y1="248.9" x2="1130" y2="248.9" stroke="#e4e4ea"/>
+<text x="64" y="252.9" text-anchor="end" font-size="10.5" fill="#7a7a8c">2.0×</text>
+<line x1="70" y1="218.6" x2="1130" y2="218.6" stroke="#e4e4ea"/>
+<text x="64" y="222.6" text-anchor="end" font-size="10.5" fill="#7a7a8c">2.5×</text>
+<line x1="70" y1="188.4" x2="1130" y2="188.4" stroke="#e4e4ea"/>
+<text x="64" y="192.4" text-anchor="end" font-size="10.5" fill="#7a7a8c">3.0×</text>
+<line x1="70" y1="158.1" x2="1130" y2="158.1" stroke="#e4e4ea"/>
+<text x="64" y="162.1" text-anchor="end" font-size="10.5" fill="#7a7a8c">3.5×</text>
+<line x1="70" y1="127.8" x2="1130" y2="127.8" stroke="#e4e4ea"/>
+<text x="64" y="131.8" text-anchor="end" font-size="10.5" fill="#7a7a8c">4.0×</text>
+<line x1="70" y1="97.6" x2="1130" y2="97.6" stroke="#e4e4ea"/>
+<text x="64" y="101.6" text-anchor="end" font-size="10.5" fill="#7a7a8c">4.5×</text>
+<line x1="70" y1="309.5" x2="1130" y2="309.5" stroke="#7a7a8c" stroke-dasharray="4 3"/>
+<rect x="81.3" y="177.7" width="22.0" height="192.3" rx="2" fill="#2a78d6"/>
+<text x="92.3" y="173.7" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.2×</text>
+<rect x="105.3" y="246.5" width="22.0" height="123.5" rx="2" fill="#9aa0a6"/>
+<text x="116.3" y="242.5" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.0×</text>
+<text x="105.3" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">640</text>
+<rect x="152.0" y="157.2" width="22.0" height="212.8" rx="2" fill="#2a78d6"/>
+<text x="163.0" y="153.2" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.5×</text>
+<rect x="176.0" y="224.5" width="22.0" height="145.5" rx="2" fill="#9aa0a6"/>
+<text x="187.0" y="220.5" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.4×</text>
+<text x="176.0" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">416</text>
+<text x="176.0" y="410" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">yolo11N-640 (production)</text>
+<rect x="222.6" y="153.2" width="22.0" height="216.8" rx="2" fill="#2a78d6"/>
+<text x="233.7" y="149.2" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.6×</text>
+<rect x="246.7" y="218.2" width="22.0" height="151.8" rx="2" fill="#9aa0a6"/>
+<text x="257.7" y="214.2" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.5×</text>
+<text x="246.7" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">320</text>
+<rect x="293.3" y="195.7" width="22.0" height="174.3" rx="2" fill="#2a78d6"/>
+<text x="304.3" y="191.7" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.9×</text>
+<rect x="317.3" y="275.2" width="22.0" height="94.8" rx="2" fill="#9aa0a6"/>
+<text x="328.3" y="271.2" text-anchor="middle" font-size="9.5" fill="#1a1a2e">1.6×</text>
+<text x="317.3" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">640</text>
+<rect x="364.0" y="167.4" width="22.0" height="202.6" rx="2" fill="#2a78d6"/>
+<text x="375.0" y="163.4" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.3×</text>
+<rect x="388.0" y="234.0" width="22.0" height="136.0" rx="2" fill="#9aa0a6"/>
+<text x="399.0" y="230.0" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.2×</text>
+<text x="388.0" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">416</text>
+<text x="388.0" y="410" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">y26n_humanshaped_v2</text>
+<rect x="434.6" y="162.9" width="22.0" height="207.1" rx="2" fill="#2a78d6"/>
+<text x="445.7" y="158.9" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.4×</text>
+<rect x="458.7" y="226.8" width="22.0" height="143.2" rx="2" fill="#9aa0a6"/>
+<text x="469.7" y="222.8" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.4×</text>
+<text x="458.7" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">320</text>
+<rect x="505.3" y="200.3" width="22.0" height="169.7" rx="2" fill="#2a78d6"/>
+<text x="516.3" y="196.3" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.8×</text>
+<rect x="529.3" y="275.4" width="22.0" height="94.6" rx="2" fill="#9aa0a6"/>
+<text x="540.3" y="271.4" text-anchor="middle" font-size="9.5" fill="#1a1a2e">1.6×</text>
+<text x="529.3" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">640</text>
+<rect x="576.0" y="176.3" width="22.0" height="193.7" rx="2" fill="#2a78d6"/>
+<text x="587.0" y="172.3" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.2×</text>
+<rect x="600.0" y="241.9" width="22.0" height="128.1" rx="2" fill="#9aa0a6"/>
+<text x="611.0" y="237.9" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.1×</text>
+<text x="600.0" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">416</text>
+<text x="600.0" y="410" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">y26n_noe2e_warm50-2</text>
+<rect x="646.6" y="153.6" width="22.0" height="216.4" rx="2" fill="#2a78d6"/>
+<text x="657.7" y="149.6" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.6×</text>
+<rect x="670.7" y="228.0" width="22.0" height="142.0" rx="2" fill="#9aa0a6"/>
+<text x="681.7" y="224.0" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.3×</text>
+<text x="670.7" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">320</text>
+<rect x="717.3" y="153.3" width="22.0" height="216.7" rx="2" fill="#2a78d6"/>
+<text x="728.3" y="149.3" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.6×</text>
+<rect x="741.3" y="240.2" width="22.0" height="129.8" rx="2" fill="#9aa0a6"/>
+<text x="752.3" y="236.2" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.1×</text>
+<text x="741.3" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">640</text>
+<rect x="788.0" y="127.6" width="22.0" height="242.4" rx="2" fill="#2a78d6"/>
+<text x="799.0" y="123.6" text-anchor="middle" font-size="9.5" fill="#1a1a2e">4.0×</text>
+<rect x="812.0" y="203.4" width="22.0" height="166.6" rx="2" fill="#9aa0a6"/>
+<text x="823.0" y="199.4" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.8×</text>
+<text x="812.0" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">416</text>
+<text x="812.0" y="410" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">y26s_humanshaped_smallpatch_v1</text>
+<rect x="858.6" y="126.5" width="22.0" height="243.5" rx="2" fill="#2a78d6"/>
+<text x="869.7" y="122.5" text-anchor="middle" font-size="9.5" fill="#1a1a2e">4.0×</text>
+<rect x="882.7" y="185.8" width="22.0" height="184.2" rx="2" fill="#9aa0a6"/>
+<text x="893.7" y="181.8" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.0×</text>
+<text x="882.7" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">320</text>
+<rect x="929.3" y="196.1" width="22.0" height="173.9" rx="2" fill="#2a78d6"/>
+<text x="940.3" y="192.1" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.9×</text>
+<rect x="953.3" y="275.2" width="22.0" height="94.8" rx="2" fill="#9aa0a6"/>
+<text x="964.3" y="271.2" text-anchor="middle" font-size="9.5" fill="#1a1a2e">1.6×</text>
+<text x="953.3" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">640</text>
+<rect x="1000.0" y="172.2" width="22.0" height="197.8" rx="2" fill="#2a78d6"/>
+<text x="1011.0" y="168.2" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.3×</text>
+<rect x="1024.0" y="241.9" width="22.0" height="128.1" rx="2" fill="#9aa0a6"/>
+<text x="1035.0" y="237.9" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.1×</text>
+<text x="1024.0" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">416</text>
+<text x="1024.0" y="410" text-anchor="middle" font-size="11" font-weight="600" fill="#1a1a2e">y26n_hv2_distill_v1 (ep 61)</text>
+<rect x="1070.6" y="170.9" width="22.0" height="199.1" rx="2" fill="#2a78d6"/>
+<text x="1081.7" y="166.9" text-anchor="middle" font-size="9.5" fill="#1a1a2e">3.3×</text>
+<rect x="1094.7" y="227.5" width="22.0" height="142.5" rx="2" fill="#9aa0a6"/>
+<text x="1105.7" y="223.5" text-anchor="middle" font-size="9.5" fill="#1a1a2e">2.4×</text>
+<text x="1094.7" y="388" text-anchor="middle" font-size="11" fill="#7a7a8c">320</text>
+<rect x="70" y="428" width="12" height="12" rx="2" fill="#2a78d6"/><text x="87" y="438" font-size="11.5" fill="#1a1a2e">this Mac · Apple M2</text>
+<rect x="270" y="428" width="12" height="12" rx="2" fill="#9aa0a6"/><text x="287" y="438" font-size="11.5" fill="#1a1a2e">pod · AMD EPYC 9655P (EXP-2026-22 bench)</text>
+</svg>

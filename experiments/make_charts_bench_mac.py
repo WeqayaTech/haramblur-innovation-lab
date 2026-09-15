@@ -14,14 +14,15 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 ROOT = HERE.parent
-MAC = ROOT / "models" / "bench_mac_20260915" / "bench_mac_m2.json"
+MAC = ROOT / "models" / "bench_mac_20260915" / "bench_mac_m2_all.json"
 POD = ROOT / "models" / "exp22_20260914" / "bench_matrix.json"
 OUT = HERE / "assets" / "bench_mac"
 
 INK, MUTE, GRID = "#1a1a2e", "#7a7a8c", "#e4e4ea"
 TAGS = [("fp32", "fp32 TFLite", "#2a78d6"), ("fp16", "FP16 TFLite", "#86b6ef"),
         ("int8", "INT8 W8A8", "#eb6834"), ("fdec", "INT8 + float decode", "#1baf7a")]
-MODELS = ["y26n_humanshaped_v2", "y26n_noe2e_warm50-2", "y26s_humanshaped_smallpatch_v1"]
+MODELS = ["yolo11N-640", "y26n_humanshaped_v2", "y26n_noe2e_warm50-2", "y26s_humanshaped_smallpatch_v1", "y26n_humanshaped_v2_distill_v1"]
+SHORT = {"yolo11N-640": "yolo11N-640 (production)", "y26n_humanshaped_v2_distill_v1": "y26n_hv2_distill_v1 (ep 61)"}
 SIZES = [640, 416, 320]
 
 
@@ -46,8 +47,9 @@ def chart_latency(mac, th):
     s = svg_open(W, H, f"TFLite latency on this Mac — {env['cpu_model'].split(',')[0]}, {th} threads",
                  f"LiteRT {env['ai_edge_litert']} + XNNPACK · batch 1 · 20 warm-up + 100 timed invokes × 3 interleaved repeats · median of medians (bar), p90 (tick) · vlm-cluster/bench_matrix.py --root")
     x0, y0, pw, ph = 70, 90, 1060, 330
-    vals = [med(mac, m, t, sz, th)["median_ms"] for m in MODELS for sz in SIZES for t, _, _ in TAGS if med(mac, m, t, sz, th)]
-    vmax = max(vals) * 1.12
+    vals = [med(mac, m, t, sz, th)["p90_ms"] for m in MODELS for sz in SIZES for t, _, _ in TAGS if med(mac, m, t, sz, th)]
+    vmax = max(vals) * 1.10
+    missing = any(not med(mac, m, t, sz, th) for m in MODELS for sz in SIZES for t, _, _ in TAGS)
     step = 10 if vmax <= 60 else (20 if vmax <= 150 else 50)
     s.append(f'<rect x="{x0}" y="{y0}" width="{pw}" height="{ph}" fill="none" stroke="{GRID}"/>')
     v = 0
@@ -63,7 +65,7 @@ def chart_latency(mac, th):
     gi = 0
     for m in MODELS:
         gx0 = x0 + gi * gw
-        s.append(f'<text x="{gx0 + 1.5*gw:.1f}" y="{y0+ph+42}" text-anchor="middle" font-size="12" font-weight="600" fill="{INK}">{m}</text>')
+        s.append(f'<text x="{gx0 + 1.5*gw:.1f}" y="{y0+ph+42}" text-anchor="middle" font-size="12" font-weight="600" fill="{INK}">{SHORT.get(m, m)}</text>')
         for sz in SIZES:
             gx = x0 + gi * gw + gw * 0.1
             s.append(f'<text x="{gx + gw*0.4:.1f}" y="{y0+ph+18}" text-anchor="middle" font-size="11" fill="{MUTE}">{sz}</text>')
@@ -86,7 +88,8 @@ def chart_latency(mac, th):
         s.append(f'<rect x="{lx}" y="{y0+ph+62}" width="12" height="12" rx="2" fill="{col}"/>')
         s.append(f'<text x="{lx+17}" y="{y0+ph+72}" font-size="11.5" fill="{INK}">{label}</text>')
         lx += 170
-    s.append(f'<text x="{x0+pw}" y="{y0+ph+72}" text-anchor="end" font-size="11" fill="{MUTE}">missing bars = file not on this Mac (pod unreachable when this ran)</text>')
+    if missing:
+        s.append(f'<text x="{x0+pw}" y="{y0+ph+72}" text-anchor="end" font-size="11" fill="{MUTE}">missing bars = file not benchmarked on this Mac</text>')
     s.append('</svg>')
     return "\n".join(s)
 
@@ -129,7 +132,7 @@ def chart_speedup(mac, pod):
             s.append(f'<text x="{x+(bw-2)/2:.1f}" y="{y0+ph-h-4:.1f}" text-anchor="middle" font-size="9.5" fill="{INK}">{r:.1f}×</text>')
         s.append(f'<text x="{x0 + i*gw + gw/2:.1f}" y="{y0+ph+18}" text-anchor="middle" font-size="11" fill="{MUTE}">{sz}</text>')
         if sz == 416:
-            s.append(f'<text x="{x0 + i*gw + gw/2:.1f}" y="{y0+ph+40}" text-anchor="middle" font-size="12" font-weight="600" fill="{INK}">{m}</text>')
+            s.append(f'<text x="{x0 + i*gw + gw/2:.1f}" y="{y0+ph+40}" text-anchor="middle" font-size="11" font-weight="600" fill="{INK}">{SHORT.get(m, m)}</text>')
     s.append(f'<rect x="{x0}" y="{y0+ph+58}" width="12" height="12" rx="2" fill="{cols["mac"]}"/><text x="{x0+17}" y="{y0+ph+68}" font-size="11.5" fill="{INK}">this Mac · Apple M2</text>')
     s.append(f'<rect x="{x0+200}" y="{y0+ph+58}" width="12" height="12" rx="2" fill="{cols["pod"]}"/><text x="{x0+217}" y="{y0+ph+68}" font-size="11.5" fill="{INK}">pod · AMD EPYC 9655P (EXP-2026-22 bench)</text>')
     s.append('</svg>')

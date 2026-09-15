@@ -1651,3 +1651,80 @@ Thresholds: IoU 0.5 for matching (`--iou`), ignore IoA ≥ 0.5 (`map_eval.IGNORE
 NMS IoU 0.7 (`pr_curve.NMS_IOU`, = the runner's `--iou` default), raw floor 0.001 (the dumps'
 `--floor`), grid 0.01 (`--grid-step`). "Ceiling" = the confidence of the first point of the
 confidence-descending curve (`curve[0].conf`).
+
+## TFLite latency on Apple silicon — this Mac (M2) vs the pod (2026-09-15)
+
+**Why:** the extension's users are on laptops and phones, not EPYC servers; the EXP-2026-22 latency
+table is a pod ranking. This is the same method (`vlm-cluster/bench_matrix.py`, now with `--root`
+so it runs anywhere from a local mirror of the `.tflite` files) on an **Apple M2 (4P+4E cores,
+16 GB, macOS 15.3.2)**, LiteRT 2.2.0 + XNNPACK (delegate creation confirmed in the log), batch 1,
+20 warm-up + 100 timed invokes × 3 interleaved repeats, each measurement in a fresh process,
+threads 1 / 4 / 8. All 60 files of the matrix (5 models × {fp32, FP16, INT8 W8A8, INT8 + float
+decode} × {640, 416, 320}); the 31 files not already local were copied from the volume via a CPU
+pod. Three passes (29 + 24 + 9 files) merged into `models/bench_mac_20260915/bench_mac_m2_all.json`;
+the two files measured in two passes agreed within 1 % (29.6 vs 29.3 ms, 85.1 vs 84.3 ms). Full
+60-row table with p90, spread, and the EPYC columns: `experiments/assets/bench_mac/SUMMARY.md`;
+charts: `experiments/assets/bench_mac/{m2_latency_4threads,m2_latency_1thread,int8_speedup_m2_vs_epyc}.svg`;
+generator `experiments/make_charts_bench_mac.py`.
+
+Median ms per frame (M2 · EPYC 9655P from the EXP-22 bench), fp32 TFLite / INT8 W8A8 / INT8 + float decode:
+
+| model | px | **M2 1 thread** | **M2 4 threads** | M2 8 threads | EPYC 1 thread | EPYC 4 threads |
+|---|---|---|---|---|---|---|
+| `yolo11N-640` (production) | 640 | 97.0 / 30.5 / 30.8 | 30.4 / 13.6 / 13.7 | 33.6 / 16.0 / 15.9 | 29.5 / 14.5 / 14.5 | 11.9 / 10.1 / 10.7 |
+| `yolo11N-640` | 416 | 41.1 / 11.7 / 11.7 | 14.0 / 5.8 / 5.8 | 15.2 / 7.3 / 7.8 | 12.2 / 5.1 / 5.1 | 7.2 / 4.1 / 3.8 |
+| `yolo11N-640` | 320 | 24.2 / 6.8 / 6.7 | 9.1 / 3.7 / 3.7 | 10.3 / 5.1 / 5.2 | 7.1 / 2.8 / 2.9 | 4.7 / 2.5 / 2.5 |
+| `y26n_humanshaped_v2` | 640 | 83.7 / 29.1 / 29.0 | 26.2 / 15.7 / 15.9 | 27.1 / 17.9 / 18.0 | 26.1 / 16.6 / 16.6 | 14.3 / 13.3 / 13.3 |
+| `y26n_humanshaped_v2` | 416 | 34.7 / 10.4 / 10.7 | 12.4 / 5.6 / 6.0 | 14.1 / 7.5 / 7.9 | 10.6 / 4.7 / 5.0 | 6.7 / 4.0 / 4.3 |
+| `y26n_humanshaped_v2` | 320 | 20.6 / 6.0 / 6.0 | 8.2 / 3.7 / 3.8 | 10.0 / 5.3 / 5.2 | 6.2 / 2.6 / 2.6 | 4.4 / 2.4 / 2.5 |
+| `y26n_noe2e_warm50-2` | 640 | 84.2 / 30.0 / 29.3 | 26.1 / 15.6 / 15.9 | 26.9 / 17.9 / 18.3 | 26.1 / 16.7 / 16.7 | 17.2 / 13.3 / 13.2 |
+| `y26n_noe2e_warm50-2` | 416 | 35.1 / 11.0 / 11.3 | 12.4 / 5.9 / 6.1 | 14.1 / 7.9 / 8.0 | 10.6 / 5.0 / 5.0 | 6.6 / 4.3 / 4.3 |
+| `y26n_noe2e_warm50-2` | 320 | 21.9 / 6.1 / 6.2 | 8.1 / 3.7 / 3.8 | 10.2 / 5.3 / 5.8 | 6.1 / 2.6 / 2.6 | 4.1 / 2.3 / 2.5 |
+| `y26s_humanshaped_smallpatch_v1` | 640 | 303.5 / 84.8 / 84.3 | 88.3 / 36.9 / 36.9 | 74.5 / 37.1 / 38.0 | 87.7 / 40.9 / 41.0 | 51.3 / 27.7 / 27.5 |
+| `y26s_humanshaped_smallpatch_v1` | 416 | 129.4 / 32.3 / 32.0 | 37.7 / 13.4 / 12.9 | 34.9 / 14.9 / 14.5 | 36.4 / 13.2 / 12.8 | 18.0 / 8.4 / 7.8 |
+| `y26s_humanshaped_smallpatch_v1` | 320 | 74.2 / 18.4 / 18.5 | 23.0 / 7.8 / 7.9 | 23.1 / 9.5 / 9.4 | 21.7 / 7.1 / 7.1 | 11.1 / 4.6 / 4.5 |
+| `y26n_humanshaped_v2_distill_v1` (ep 61) | 640 | 83.3 / 29.0 / 27.7 | 32.3 / 16.5 / 15.2 | 27.9 / 18.1 / 16.5 | 26.1 / 16.7 / 15.0 | 11.5 / 13.2 / 12.3 |
+| `y26n_humanshaped_v2_distill_v1` | 416 | 34.8 / 10.6 / 10.5 | 12.5 / 6.0 / 5.7 | 14.1 / 7.7 / 7.5 | 10.6 / 5.0 / 4.7 | 6.2 / 4.3 / 4.0 |
+| `y26n_humanshaped_v2_distill_v1` | 320 | 20.4 / 6.2 / 5.9 | 8.2 / 3.7 / 3.7 | 10.5 / 5.2 / 5.3 | 6.1 / 2.6 / 2.5 | 4.3 / 2.3 / 2.2 |
+
+FP16 rows equal the fp32 rows on this Mac too (±1 ms; weights are dequantized at load) — omitted above, in `SUMMARY.md`.
+
+**What it says:**
+
+1. **INT8 matters far more on Apple silicon than on the pod.** One M2 performance core runs fp32
+   about 3.2× slower than one EPYC core (83.7 vs 26.1 ms, nano @640) but INT8 only 1.8× slower
+   (29.1 vs 16.6 ms): the INT8-over-fp32 speed-up is **2.8–4.0× on the M2 vs 1.6–3.0× on the pod**,
+   at every model and size. fp32/FP16 on an M-series CPU is the wrong file; the pod table understated that.
+2. **The float-decode fix costs nothing here either** — within ±0.5 ms of plain INT8 in all 15 cells
+   (the 31 float decode tensors are elementwise ops on `[1, k, 8400]`), so the export decision is
+   unchanged by the M2 numbers: INT8 + float decode at the chosen size.
+3. **4 threads is the M2's sweet spot; 8 is not.** 4 threads gives 2.9–3.4× over 1 thread on fp32
+   but only 1.8–2.3× on INT8 (the nanos' INT8 graphs are too small to feed 4 cores). 8 threads is
+   *slower* than 4 in 39 of 45 cells (efficiency-core scheduling) and noisier — never pin more
+   threads than performance cores.
+4. **Budget at 4 threads on this Mac:** a nano at 640 in INT8 is ~16 ms (≈60 fps ceiling before
+   pre/post-processing); `y26s_humanshaped_smallpatch_v1` at 640 is ~37 ms (≈27 fps), and at 416
+   it is 13 ms — the same cost as a nano at 640 for +5 pts holdout mAP50-95 (EXP-22:
+   0.8564 vs 0.8416 fix @416 vs nano fix @640). Production `yolo11N-640` is not faster than the
+   YOLO26 nanos at any size or precision (30.5 vs 29.1 ms INT8 @640 single-thread).
+5. **Resolution is still the biggest lever:** 640 → 416 is 2.6–2.9× faster at every precision, on
+   both machines.
+
+**What this does NOT show:** one Mac, one chip generation (M2), one LiteRT build, CPU only — no
+Core ML / Metal delegate, and **not the extension's TF.js path** (WebGL/WebGPU in the browser),
+which is what users actually run; treat these as the CPU-fallback numbers and the cross-machine
+ratio for INT8. The Mac was not idle (load average 8–15 at pass start, partly the benchmark's own
+8-thread phases): 40 of 180 (cell × thread) measurements had > 10 % spread between repeats, mostly
+at 4/8 threads; the 1-thread rows are the stable ones (8 flagged, all ≤ 20 %). No phone numbers.
+No accuracy is measured here — the files are byte-identical to the EXP-22 matrix.
+
+**Verify it yourself:**
+
+```bash
+python3.12 -m venv ~/.venvs/litert_mac && ~/.venvs/litert_mac/bin/pip install ai-edge-litert==2.2.0 numpy
+# mirror: models/bench_mac_20260915/files/<run>/sz<SZ>/<run>_<tag>.tflite (symlinks to models/haramblur_models_20260909/…
+#          for the 29 local files; the other 31 scp'd from the volume, paths as bench_matrix.resolve())
+~/.venvs/litert_mac/bin/python vlm-cluster/bench_matrix.py --root models/bench_mac_20260915/files \
+  --out models/bench_mac_20260915/bench_mac_m2.json --threads 1,4,8 --repeats 3
+python3 experiments/make_charts_bench_mac.py     # charts + SUMMARY.md, needs the merged bench_mac_m2_all.json
+```
