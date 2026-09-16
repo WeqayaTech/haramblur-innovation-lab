@@ -57,6 +57,12 @@ core** = imported by many other scripts, treat signature changes as breaking.
 | `distill_matrix.sh` | Pod script: full precision matrix for one checkpoint — latency bench, fp32/INT8/D1-fix TFLite exports at 640/416/320 (size-guarded INT8), `.pt` eval on GPU then the nine CPU cells, `RESULT` lines with per-class AP. `bash distill_matrix.sh <run> <best.pt>`; waits for `/workspace/venv_setup.log` `VENV_READY`. Reads cores from cgroup quota. | Active |
 | `matrix_lib.sh` + `full_matrix.sh` + `run_cells.sh` + `join_pod.sh` | **EXP-2026-22 multi-pod matrix.** `matrix_lib.sh` holds the config and the `export_all` / `cell` / `report_line` functions (fp32 / FP16 / INT8 / float-decode exports, Spotlight-val or holdout scoring incl. per-collection + `randoms_fp.py`, JSON-validated skip, empty-sidecar purge). `full_matrix.sh gpu|cpu|exports` runs single-pod queues; `run_cells.sh <list> [P]` is the multi-pod **claim queue** (each cell = atomic `mkdir /workspace/exp22/claims/<cell>`, P cells in parallel, threads = cores/P, claim only once a slot is free); `join_pod.sh <name>` bootstraps any fresh pod (local venv on the container disk, then the runner). `make_lists.py` writes the priority-ordered cell lists; `make_shards.py` is the superseded static planner. | Active |
 | `matrix_status.py` | One-screen status + sanity check for a multi-pod run: done / claimed / running per host, stalled claims, `CELL_FAILED`s, corrupt JSONs, and accuracy bands (n_images, plausible mAP, fp32-TFLite vs `.pt` ≤ 0.010, FP16 vs fp32 ≤ 0.002, INT8/fix within [−0.12, +0.06] of `.pt`). Run on any pod with the volume. | Active |
+| `bootstrap_pod.sh` | New-pod bootstrap for multi-pod shards: builds the CPU/GPU venv, then runs `run_cells.sh` on that pod's shard list. `bash bootstrap_pod.sh <podname>`. | Active |
+| `join_pod.sh` | Join a fresh CPU/GPU pod to the EXP-22 queue: builds a local venv (container disk), then starts the claim runner. `bash join_pod.sh <podname> [P]`. | Active |
+| `cpu_start.sh` | Wait for the shared CPU venv on the volume, then start this pod's queue runner. `cpu_start.sh <name> <P>`. | Active |
+| `bench_all.sh` | CPU latency @640 for every model × {fp32, fp16, int8, fdec} on an idle pod → `bench.json`. | Active |
+| `scan_raw.py` | Validates raw JSON sidecars in the matrix eval dir; reports corrupt/truncated files. | Active |
+| `reset_claims.sh` | 3-line helper: drops claim dirs for cells that have no `_map.json` (dead runners). Run only when no `run_cells.sh` is active. | Active |
 | `fp16_cast.py`, `randoms_fp.py` | Weight-cast an fp32 `.tflite` to float16 (ai_edge_quantizer `float_casting`, carries `metadata.json`); false-blur arm of the holdout (`randoms__*` person-free images: image FP rate and boxes/100 at conf 0.25 / 0.45) from a raw dump. | Active |
 | `build_matrix_report.py` | Renders the precision × resolution × dataset report (Spotlight-val + holdout, pooled and per-collection dominant-class AP, per-class @640, optional latency table) from `*_map.json` files into one self-contained HTML; missing cells render as "—" so it can be re-run as the matrix fills. | Active |
 | `bench_matrix.py` | **The latency standard.** One pod, one session, every `.tflite` of the matrix: LiteRT + XNNPACK, batch 1, fixed random input, 20 warm-up + 100 timed invokes, 3 interleaved repeats × {1, 4} threads, each measurement in a fresh process; reports median-of-medians, p90, repeat spread (⚠ > 10 % = noisy neighbour), load time, size, sha; records CPU model / cgroup cores / LiteRT version / start load. Feed the JSON to `build_matrix_report.py --bench-matrix`. Supersedes ad-hoc `bench_tflite.py` runs for any cross-model comparison. `--root DIR` reads `DIR/<run>/sz<SZ>/<run>_<tag>.tflite` instead of the volume, so the same method runs on any machine (used 2026-09-15 on the owner's M2 Mac; records Apple-silicon P/E core counts). | Active |
@@ -102,6 +108,8 @@ core** = imported by many other scripts, treat signature changes as breaking.
 | `pipeline_v1_eval.py` | Runs/scores the full assembled pipeline v1 (`run`/`score`/`compare`/`selftest`). | Historical (superseded by production `parallel_emit.py`+`spotlight_batch.py` path) |
 | `verify_labels.py`, `verify_datasets.py` | Post-hoc verification: emitted Spotlight labels are internally consistent; staged datasets on the volume match `DATASET_REGISTRY.md`'s expected state. | Active |
 | `estimate_cost.py` | Accurate cost/time estimate for labeling a target corpus with Spotlight, before running it. | Active |
+| `dump_crops.py` | Dumps Spotlight-style crops for every SAM3 detection so an agent can view each crop and produce the verdict JSON directly (no Gemini call). Reuses `spotlight_run.build_crop` so crops are byte-identical. `--selftest`. | Active |
+| `pod_setup.sh` | Fresh-pod setup for the Spotlight pipeline: installs deps, fixes torch/SAM3 DTensor import, pins threads, verifies imports + selftests. Source it (`source pod_setup.sh`) so exports reach your shell. Warns on Blackwell pods. | Active |
 | `mk_runmeta.py`* | *(referenced in CLAUDE.md, lives under `labeling/tools/` per-dataset, not `vlm-cluster/`)* Reconstructs `run_meta.json`+`cost_report.json` for Batch-API runs that never wrote them, by hashing the live `PROMPT` constant. | Active |
 
 ## Crowd-scene track (SAM-outlined masks on human GT boxes)
@@ -185,6 +193,95 @@ core** = imported by many other scripts, treat signature changes as breaking.
 | `experiments/make_charts_pr_quant.py` | Threshold-vs-recall/precision figures for one model across export precisions (fp32 `.pt` vs INT8 W8A8 vs INT8 + float-decode fix): recall panel, precision panel, magnified INT8−fp32 delta panel, confidence-ceiling markers; reads `models/pr_quant_20260914/*.json` from `pr_curve.py --grid-step 0.01 --agnostic`, writes one SVG per dataset×size×{any person, Woman, Man, Child} plus `SUMMARY.md` tables to `experiments/assets/pr_quant/`. | Active |
 | `experiments/make_charts.py`, `make_charts_exp02.py`, `..._exp03.py`, `..._exp04.py`, `..._exp09.py`, `..._exp10.py`, `..._exp12.py` | Generate standalone SVG charts from hardcoded eval numbers, one file per experiment; some also do the SVG→PNG Chrome-headless conversion for ClickUp. Pattern: copy the most recent one (`make_charts_exp12.py`) rather than starting from scratch. | Active (one-off per experiment, expected to keep growing — this is normal, not debt) |
 
+## Labeling analysis (`vlm-cluster/labeling_analysis/`)
+
+Pod-side analysis scripts for the Spotlight production labeling run — tallies, diffs,
+and diagnostics on verdicts/labels. All read from the volume, no API calls.
+
+| File | Purpose | Status |
+|---|---|---|
+| `diff_labels.py` | Proves a `--child-by-age` label dir differs from the baseline only by children. | Active |
+| `dropped_age_signal.py` | Is `estimated_age` informative for the detections Spotlight dropped? | Active |
+| `dropped_gender_vocab.py` | What words did Gemini put in `gender` for dropped detections? | Active |
+| `kept_child_gender.py` | Of the children the emit already keeps, how many had no gender? | Active |
+| `sam_agree_stats.py` | SAM3 vs Spotlight agreement statistics. | Active |
+| `stage_changed.py` | Stages only the images the `--child-by-age` rule can change. | Active |
+| `stage_changed_sam.py` | Stages only the images the SAM3-confirmed child rescue can change. | Active |
+| `subsets.py` | Subset extraction from the production run. | Active |
+| `dash.py` | Production run dashboard. | Active |
+| `status.py` | Production run status tracker. | Active |
+| `rebuild_ledger.py` | Rebuilds the production run ledger. | Active |
+| `sample_buckets.py` | 3 random examples from each of 4 mutually exclusive abstention buckets. | Active |
+| `sample_cards.py` | Stratified blind sample of Spotlight verdicts → `cards.json` (base64 crops). | Active |
+| `pass2.py`, `pass3.py`, `pass4.py` | Multi-pass unknown-gender analysis (face/sizeband/modelconf). | Active |
+| `rescued_samclass.py` | Of children rescued by the age-only rule, what did SAM3 independently call them? | Active |
+| `labelsize.py` | Label-file size distribution analysis. | Active |
+| `dets_diag.py` | Detection-level diagnostics (confidence/size/overlap distributions). | Active |
+
+## Sol / Gemini 3.7 comparison (`vlm-cluster/sol_compare/`)
+
+Head-to-head VLM comparison on the LAGENDA fl1199 and holdout sets: Sol vs SAM3+Spotlight,
+Gemini 3.7 Flash vs the production Gemini Flash-Lite.
+
+| File | Purpose | Status |
+|---|---|---|
+| `run_lagenda_fl1199_sol.py` | Run one Spotlight-style Sol classification per LAGENDA fl1199 SAM3 detection. | Active |
+| `run_lagenda_fl1199_gemini37.py` | Classify LAGENDA fl1199 SAM3 spotlight crops with Gemini 3.7 Flash. | Active |
+| `run_sam3_sol_compare_v1.py` | Classify one SAM3-highlighted detection per Sol request on the holdout set. | Active |
+| `score_lagenda_fl1199_sol.py` | Score Sol labels vs human 3-class labels on LAGENDA fl1199. | Active |
+| `score_lagenda_fl1199_gemini37.py` | Score Gemini 3.7 verdicts on the exact Sol-matched LAGENDA rows. | Active |
+| `build_pod_dashboard.py` | Final Gemini vs batched-Sol comparison dashboard (self-contained HTML). | Active |
+
+## Object-set and small-person holdout tools
+
+| File | Purpose | Status |
+|---|---|---|
+| `score_object_set.py` | Scores a model's YOLO labels vs the relabeled object_set GT (recall, classification accuracy, FP rate). | Active |
+| `build_object_set_sidecars.py` | Builds raw JSON sidecars alongside object_set YOLO labels. | Active |
+| `build_relabel_gallery.py` | Visual gallery of relabeled vs original labels. | Active |
+| `holdout_small_build.py` | Mines the QA holdout for clearly-small people and emits a scorable slice. | Active |
+| `holdout_small_score.py` | Scores the five candidate models on the holdout small slice. | Active |
+| `small_proof_html.py` | Self-contained HTML proof report for the two small-person benchmarks. | Active |
+| `avatar_e2e.py` | Per-size per-class detection + end-to-end for all five models on the holdout. | Active |
+| `build_humanshaped_exposure_map.py` | Builds the humanshaped-policy exposure classification map. | Active |
+
+## Production run diagnostics
+
+| File | Purpose | Status |
+|---|---|---|
+| `exp_unk_stats.py` | Anatomy of Gemini's `unknown` answers in the Spotlight production run (per-axis tallies, observables). | Active |
+| `fp_anatomy.py` | Anatomy of false-positive detections. | Active |
+
+## Training launch scripts (`vlm-cluster/training_launches/`)
+
+Exact training commands for each model in the current lineage. These are the
+reproducibility record — each one documents the dataset, config, warm-restart
+checkpoint, and augmentation that produced a specific trained model.
+
+| File | Purpose | Status |
+|---|---|---|
+| `train_y26s_humanshaped_smallpatch.py` | YOLO26s humanshaped + small-object-patches — produced the current best model. | Active |
+| `train_y26n_humanshaped_smallpatch_v1.py` | YOLO26n humanshaped + small-object-patches v1. | Active |
+| `train_y26n_v2_distill_v1.py` | YOLO26n v2 distillation from the y26s teacher. | Active |
+| `train_y26n_humanshaped_smallpatch_distill_v1.py` | YOLO26n humanshaped + smallpatch, distilled from teacher. | Active |
+| `resume_y26n_v2_distill_v1.py` | Resume script for the nano distillation run. | Active |
+| `small_object_patches.py` | The `SmallObjectPatches` augmentation class (standalone, imported by the trainers above). | Active |
+
+## VLM label-error analysis pipeline
+
+End-to-end pipeline for finding and confirming label errors using VLM-based independent reads.
+Runs on pod with GPU (VLM inference). The pipeline is: describe hard negatives → compare 3-way
+(Label vs Model vs VLM) → confirm label errors → flag VLM self-contradictions.
+
+| File | Purpose | Status |
+|---|---|---|
+| `describe_hardneg.py` | Describe confident misclassifications with VLM, tagged by confusion pair (`<gt>_as_<pred>`). | Active |
+| `annotate_focus.py` | Add disputed bounding box to existing hard-neg descriptions (no re-run needed). | Active |
+| `compare_classes.py` | Unified W/M/C Label vs Model confusion matrix + VLM verification of every mismatch. | Active |
+| `compare_child.py` | Label vs Model vs VLM 3-way comparison on child crops specifically. | Active |
+| `label_errors.py` | Confirm label errors where model + VLM agree against the dataset label (age-arbitrable). | Active |
+| `vlm_contradictions.py` | Flag VLM self-contradictions (gender read vs facial_hair/attire cues in same record). | Active |
+
 ## Historical val-set audit scripts (`vlm-cluster/historical/`)
 
 Scripts that ran once for closed experiments (pre-EXP-framework val-set audits), kept for
@@ -193,13 +290,9 @@ from them.
 
 | File | Purpose | Status |
 |---|---|---|
-| `describe_hardneg.py` | Describes the model's confident misclassifications (hard-negative focus). | Historical |
-| `annotate_focus.py` | Annotates focus areas for hard-negative analysis. | Historical |
-| `label_errors.py` | Confirms label errors from hard-negative descriptions. | Historical |
-| `vlm_contradictions.py` | Flags a VLM's self-contradictions (gender read vs attire cues). | Historical |
-| `compare_classes.py` | Label vs Model vs VLM 3-way class audit. | Historical |
 | `compare_gender.py` | Label vs Model vs VLM 3-way gender audit. | Historical |
-| `compare_child.py` | Label vs Model vs VLM 3-way child audit. | Historical |
+| `box_gallery.py` | EXP-2026-10 visual gallery of Lite's box corrections vs SAM3 vs GT. | Historical |
+| `cluster_failures.py` | Object-feature clustering of VLM failure dimensions (standalone, no pandas). | Historical |
 
 ---
 

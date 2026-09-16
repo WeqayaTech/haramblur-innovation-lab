@@ -1,0 +1,29 @@
+# VLM crop description (describe.py + api_describers.py) — GPU pod.
+#
+#   pip install -r requirements_describe.txt
+#
+# Covers: describe.py, api_describers.py, cluster.py, analyze.py,
+#         field_report.py, collection_needs.py.
+#
+# torch must match the pod's CUDA — install it separately.
+# API-engine deps are optional; install only the one you use.
+
+transformers>=4.49
+qwen-vl-utils>=0.0.8
+accelerate>=0.30
+opencv-python>=4.8
+PyYAML>=6.0
+Pillow>=10.0
+numpy>=1.24
+python-dotenv>=1.0
+
+# Clustering (cluster.py) — optional, falls back gracefully
+# sentence-transformers>=2.7
+# scikit-learn>=1.3
+# hdbscan>=0.8.33
+# umap-learn>=0.5.5
+
+# API engines (api_describers.py) — install only the one(s) you use
+# openai>=1.0
+# google-genai>=0.3
+# anthropic>=0.40

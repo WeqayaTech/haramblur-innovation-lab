@@ -1,0 +1,16 @@
+# Evaluation and scoring tools — CPU-only, no GPU needed.
+#
+#   pip install -r requirements_eval.txt
+#
+# Covers: map_eval.py, conf_sweep.py, ap_sweep.py, pr_curve.py,
+#         eval_negatives_crowd.py, run_autolabel_on_manifest.py,
+#         eval_taxonomy.py, deploy_compare.py, deploy_report.py,
+#         build_error_gallery.py, and other scoring/gallery scripts.
+#
+# Most of these scripts also work with just numpy + Pillow (the two
+# heaviest deps here); the rest are needed for specific features.
+
+numpy>=1.24
+Pillow>=10.0
+PyYAML>=6.0
+opencv-python>=4.8

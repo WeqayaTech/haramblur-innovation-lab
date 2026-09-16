@@ -1,0 +1,18 @@
+# Training (custom Ultralytics trainers) — GPU pod, system torch.
+#
+#   pip install -r requirements_training.txt
+#
+# Covers: train_gradsuppress.py, train_small_object_patches.py,
+#         train_twolabel.py, train_gradsuppress_yoloe.py,
+#         wandb_mirror.py, track_small_object_progress.py.
+#
+# torch must match the pod's CUDA — install it separately first
+# (cu124 for Ada/Ampere, cu128 for Blackwell), then this file.
+
+ultralytics>=8.4.82
+numpy>=1.24
+Pillow>=10.0
+PyYAML>=6.0
+opencv-python>=4.8
+matplotlib>=3.7
+# wandb       # optional, only for wandb_mirror.py

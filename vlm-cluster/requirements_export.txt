@@ -1,0 +1,23 @@
+# TFLite / LiteRT export and quantization — separate venv recommended.
+#
+#   python3 -m venv ~/venvs/export_tflite
+#   ~/venvs/export_tflite/bin/pip install -r requirements_export.txt
+#
+# Covers: float_head_quant.py, fp16_cast.py, bench_tflite.py, bench_matrix.py,
+#         tflite_tensor_inspect.py, tflite_scopes.py, distill_matrix.sh,
+#         and the full_matrix.sh / run_cells.sh multi-pod harness.
+#
+# torch is CPU-only here (exports don't need GPU).
+
+torch --index-url https://download.pytorch.org/whl/cpu
+torchvision --index-url https://download.pytorch.org/whl/cpu
+ultralytics>=8.4.82
+ai-edge-litert>=2.2.0
+ai-edge-quantizer>=0.9.0
+litert-torch>=0.9.4
+pycocotools
+numpy>=1.24
+Pillow>=10.0
+PyYAML>=6.0
+opencv-python>=4.8
+matplotlib>=3.7

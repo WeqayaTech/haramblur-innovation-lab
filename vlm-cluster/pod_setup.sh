@@ -4,7 +4,7 @@
 #   bash /workspace/autolabel_pipeline_v2/pod_setup.sh
 #
 # Fixes the things that bite every new pod, in the order they must happen:
-#   1. The pipeline's python deps are missing (requirements_clean.txt).
+#   1. The pipeline's python deps are missing (requirements_pipeline.txt).
 #   2. RunPod images ship torch 2.4.1 with transformers 5.x -> SAM3 import
 #      dies on `cannot import name 'DTensor'`. Newer torch fixes it. This runs
 #      AFTER the deps install, so an old torch pinned by that file is corrected.
@@ -29,7 +29,7 @@ esac
 echo "=== 2/6  python deps ==="
 # Must run BEFORE the torch step: this file can pin an old torch, and the
 # step below then corrects it. Running it after would re-break SAM3's import.
-REQS=/workspace/data_inspection_tools/vlm-cluster/requirements_clean.txt
+REQS=/workspace/data_inspection_tools/vlm-cluster/requirements_pipeline.txt
 if [ -f "$REQS" ]; then
     echo "installing $REQS"
     pip install -q -r "$REQS" || { echo "!! pip install failed — stop here"; exit 1; }
