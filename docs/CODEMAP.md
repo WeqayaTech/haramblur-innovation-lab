@@ -193,6 +193,77 @@ core** = imported by many other scripts, treat signature changes as breaking.
 | `experiments/make_charts_pr_quant.py` | Threshold-vs-recall/precision figures for one model across export precisions (fp32 `.pt` vs INT8 W8A8 vs INT8 + float-decode fix): recall panel, precision panel, magnified INT8−fp32 delta panel, confidence-ceiling markers; reads `models/pr_quant_20260914/*.json` from `pr_curve.py --grid-step 0.01 --agnostic`, writes one SVG per dataset×size×{any person, Woman, Man, Child} plus `SUMMARY.md` tables to `experiments/assets/pr_quant/`. | Active |
 | `experiments/make_charts.py`, `make_charts_exp02.py`, `..._exp03.py`, `..._exp04.py`, `..._exp09.py`, `..._exp10.py`, `..._exp12.py` | Generate standalone SVG charts from hardcoded eval numbers, one file per experiment; some also do the SVG→PNG Chrome-headless conversion for ClickUp. Pattern: copy the most recent one (`make_charts_exp12.py`) rather than starting from scratch. | Active (one-off per experiment, expected to keep growing — this is normal, not debt) |
 
+## Labeling analysis (`vlm-cluster/labeling_analysis/`)
+
+Pod-side analysis scripts for the Spotlight production labeling run — tallies, diffs,
+and diagnostics on verdicts/labels. All read from the volume, no API calls.
+
+| File | Purpose | Status |
+|---|---|---|
+| `diff_labels.py` | Proves a `--child-by-age` label dir differs from the baseline only by children. | Active |
+| `dropped_age_signal.py` | Is `estimated_age` informative for the detections Spotlight dropped? | Active |
+| `dropped_gender_vocab.py` | What words did Gemini put in `gender` for dropped detections? | Active |
+| `kept_child_gender.py` | Of the children the emit already keeps, how many had no gender? | Active |
+| `sam_agree_stats.py` | SAM3 vs Spotlight agreement statistics. | Active |
+| `stage_changed.py` | Stages only the images the `--child-by-age` rule can change. | Active |
+| `stage_changed_sam.py` | Stages only the images the SAM3-confirmed child rescue can change. | Active |
+| `subsets.py` | Subset extraction from the production run. | Active |
+| `dash.py` | Production run dashboard. | Active |
+| `status.py` | Production run status tracker. | Active |
+| `rebuild_ledger.py` | Rebuilds the production run ledger. | Active |
+| `sample_buckets.py` | 3 random examples from each of 4 mutually exclusive abstention buckets. | Active |
+| `sample_cards.py` | Stratified blind sample of Spotlight verdicts → `cards.json` (base64 crops). | Active |
+| `pass2.py`, `pass3.py`, `pass4.py` | Multi-pass unknown-gender analysis (face/sizeband/modelconf). | Active |
+
+## Sol / Gemini 3.7 comparison (`vlm-cluster/sol_compare/`)
+
+Head-to-head VLM comparison on the LAGENDA fl1199 and holdout sets: Sol vs SAM3+Spotlight,
+Gemini 3.7 Flash vs the production Gemini Flash-Lite.
+
+| File | Purpose | Status |
+|---|---|---|
+| `run_lagenda_fl1199_sol.py` | Run one Spotlight-style Sol classification per LAGENDA fl1199 SAM3 detection. | Active |
+| `run_lagenda_fl1199_gemini37.py` | Classify LAGENDA fl1199 SAM3 spotlight crops with Gemini 3.7 Flash. | Active |
+| `run_sam3_sol_compare_v1.py` | Classify one SAM3-highlighted detection per Sol request on the holdout set. | Active |
+| `score_lagenda_fl1199_sol.py` | Score Sol labels vs human 3-class labels on LAGENDA fl1199. | Active |
+| `score_lagenda_fl1199_gemini37.py` | Score Gemini 3.7 verdicts on the exact Sol-matched LAGENDA rows. | Active |
+| `build_pod_dashboard.py` | Final Gemini vs batched-Sol comparison dashboard (self-contained HTML). | Active |
+
+## Object-set and small-person holdout tools
+
+| File | Purpose | Status |
+|---|---|---|
+| `score_object_set.py` | Scores a model's YOLO labels vs the relabeled object_set GT (recall, classification accuracy, FP rate). | Active |
+| `build_object_set_sidecars.py` | Builds raw JSON sidecars alongside object_set YOLO labels. | Active |
+| `build_relabel_gallery.py` | Visual gallery of relabeled vs original labels. | Active |
+| `holdout_small_build.py` | Mines the QA holdout for clearly-small people and emits a scorable slice. | Active |
+| `holdout_small_score.py` | Scores the five candidate models on the holdout small slice. | Active |
+| `small_proof_html.py` | Self-contained HTML proof report for the two small-person benchmarks. | Active |
+| `avatar_e2e.py` | Per-size per-class detection + end-to-end for all five models on the holdout. | Active |
+| `build_humanshaped_exposure_map.py` | Builds the humanshaped-policy exposure classification map. | Active |
+
+## Production run diagnostics
+
+| File | Purpose | Status |
+|---|---|---|
+| `exp_unk_stats.py` | Anatomy of Gemini's `unknown` answers in the Spotlight production run (per-axis tallies, observables). | Active |
+| `fp_anatomy.py` | Anatomy of false-positive detections. | Active |
+
+## Training launch scripts (`vlm-cluster/training_launches/`)
+
+Exact training commands for each model in the current lineage. These are the
+reproducibility record — each one documents the dataset, config, warm-restart
+checkpoint, and augmentation that produced a specific trained model.
+
+| File | Purpose | Status |
+|---|---|---|
+| `train_y26s_humanshaped_smallpatch.py` | YOLO26s humanshaped + small-object-patches — produced the current best model. | Active |
+| `train_y26n_humanshaped_smallpatch_v1.py` | YOLO26n humanshaped + small-object-patches v1. | Active |
+| `train_y26n_v2_distill_v1.py` | YOLO26n v2 distillation from the y26s teacher. | Active |
+| `train_y26n_humanshaped_smallpatch_distill_v1.py` | YOLO26n humanshaped + smallpatch, distilled from teacher. | Active |
+| `resume_y26n_v2_distill_v1.py` | Resume script for the nano distillation run. | Active |
+| `small_object_patches.py` | The `SmallObjectPatches` augmentation class (standalone, imported by the trainers above). | Active |
+
 ## Historical val-set audit scripts (`vlm-cluster/historical/`)
 
 Scripts that ran once for closed experiments (pre-EXP-framework val-set audits), kept for
