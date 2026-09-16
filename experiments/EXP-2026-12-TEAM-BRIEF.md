@@ -276,4 +276,4 @@ Readings:
 
 *Full details + verify-it-yourself appendix:
 `experiments/EXP-2026-12-yolo26-production-candidate.md` · protocol for adding any model:
-`docs/MODEL_EVAL_PROTOCOL.md`.*
+`docs/COMPONENT_FRAMEWORK.md`.*

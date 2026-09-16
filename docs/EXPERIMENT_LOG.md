@@ -45,8 +45,8 @@ just anchors the date.
 | 2026-07-28→30 | **Production run:** Spotlight labels the full OIV7 train split | 475,207 images → 1.58M people, 100%-verified, $507 | `docs/SPOTLIGHT_PRODUCTION_RUN.md` |
 | 2026-08-08 | Five/seven-model benchmark round (gradsupp validated, latency session) | `y26n_gradsupp` non-e2e read is the free +1.9pt win; recommendation set | `experiments/ROUND-2026-08-08-TEAM-BRIEF.md` |
 | 2026-08-10 | LAGENDA v2 rebuild + mAP protocol overhaul (pycocotools-conventional) | Corrected LAGENDA detection recall 72-80% (was prominent-subject-only ~93%) | `docs/MODEL_COMPARISON.md` |
-| 2026-08-18 | **`haramblur_holdout` built** — first dedicated eval set + first Gulf-dress slice | Gulf-dress bias quantified: SAM3 misreads 4.94% of shaykhs as Woman; Gemini gate fixes to 0% | `docs/DATASET_REGISTRY.md`, `docs/HOLDOUT_PATHS.md` |
-| 2026-08-23 | LAGENDA `fl1199` built — the only true 3-way (Gemini vs Sol vs human) set | 1,199 images, 1,514 fully human-labelled people | `docs/LAGENDA_SOL_HANDOFF.md` |
+| 2026-08-18 | **`haramblur_holdout` built** — first dedicated eval set + first Gulf-dress slice | Gulf-dress bias quantified: SAM3 misreads 4.94% of shaykhs as Woman; Gemini gate fixes to 0% | `docs/DATASET_REGISTRY.md`, `docs/HOLDOUT_BENCHMARK_HANDOFF.md` |
+| 2026-08-23 | LAGENDA `fl1199` built — the only true 3-way (Gemini vs Sol vs human) set | 1,199 images, 1,514 fully human-labelled people | `docs/LAGENDA_HANDOFF.md` |
 | 2026-08-25→29 | `deploy_compare` ship-table, five-model round, small-person QA slice | y26n_warm50 recommended deployable threshold; sheikh-context-women exposure gap found | memory `deploy-compare-ship-table` |
 | 2026-08-31 | `not_person` hard-negative mining from production Spotlight verdicts | 9,254 images where SAM3+Gemini disagreed on person-hood — untested training signal | `docs/DATASET_REGISTRY.md` |
 | 2026-09-05→08 | Humanshaped labeling policy change + benchmark | See EXP-20 above | `docs/MODEL_COMPARISON.md` |

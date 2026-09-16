@@ -3,7 +3,7 @@
 Five new models measured on the identical protocol used for every model so far (same
 images verified by count, 640 px, conf 0.45, IoU-0.5 matching, same scorers, one shared
 mAP evaluator). Full side-by-side of all ten models measured to date:
-`docs/MODEL_COMPARISON.md`. Method: `docs/MODEL_EVAL_OVERVIEW.md`.
+`docs/MODEL_COMPARISON.md`. Method: `docs/COMPONENT_FRAMEWORK.md`.
 
 ## What was tried
 

@@ -14,7 +14,7 @@ before assuming they do (`find /workspace -iname "<name>"`).
 ## Track 2 — Label verification audits (on Open Images val/train data)
 
 ### Val-set 3-way audit
-Tools: `compare_classes.py`, `compare_gender.py`, `compare_child.py` (all in `vlm-cluster/`).
+Tools: `compare_classes.py`, `compare_gender.py`, `compare_child.py` (all in `vlm-cluster/historical/`).
 Compare **Label vs production YOLO-MIT prediction vs VLM description** on Open Images val boxes.
 `compare_gender.py` scopes to Woman/Man boxes (gender axis only); `compare_child.py` scopes to
 Child boxes (age axis only); `compare_classes.py` does full 3-class. Each buckets outcomes into

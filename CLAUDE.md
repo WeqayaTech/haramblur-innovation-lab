@@ -116,10 +116,9 @@ Innovation-lab/
 │   ├── AUDIT_HISTORY.md         # pre-EXP-framework history (val-set audits, pipeline design)
 │   ├── SPOTLIGHT_PRODUCTION_RUN.md   # the full OIV7 production labeling run
 │   ├── HOLDOUT_BENCHMARK_HANDOFF.md  # how to score any model against haramblur_holdout
-│   ├── HOLDOUT_PATHS.md / LAGENDA_*.md / SAM3_OUTPUT_HANDOFF.md  # dataset-specific handoffs
-│   ├── MODEL_EVAL_OVERVIEW.md / MODEL_EVAL_PROTOCOL.md  # method one-pagers
+│   ├── LAGENDA_HANDOFF.md / SAM3_OUTPUT_HANDOFF.md  # dataset-specific handoffs
 │   ├── TFJS_EXPORT_RECIPE.md / AUGMENTATION_CODE.md / TRAINING_CONFIG_HISTORY.md
-│   └── PIPELINE_*.md / SPOTLIGHT_PIPELINE_OVERVIEW.md / AUTOLABEL_PIPELINE_V2_RUN.md
+│   └── PIPELINE_V1_*.md / AUTOLABEL_PIPELINE_V2_RUN.md
 ├── experiments/
 │   ├── EXPERIMENT_TEMPLATE.md   # copy this to start a new EXP
 │   ├── EXP-YYYY-NN-<slug>.md    # one full writeup per experiment (bar → method → result)

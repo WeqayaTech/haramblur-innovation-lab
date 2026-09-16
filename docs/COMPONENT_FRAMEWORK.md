@@ -98,6 +98,89 @@ known attire is a reliable human label even where age isn't).
 **Tooling:** `translation.py` scheme `gender_only` + `eval_taxonomy.py`; for detector-style
 systems, the gender-only-error split in `run_autolabel_on_manifest.py`.
 
+## Precise metric definitions
+
+All matching is greedy one-to-one, IoU ≥ 0.5, each GT box claimable once. All label-file
+metrics are at the production operating point: 640 px input, confidence 0.45.
+
+**False-positive side (the complaint):**
+
+- **Object-set image-FP rate** = images gaining ≥ 1 detection ÷ 259. (No people exist in
+  these images, so every detection is a false person.) Also reported: FP boxes per 100
+  images.
+- **PASS FPs/100** = total detections ÷ 3,000 × 100. Same logic on ordinary empty scenes.
+- **Crowd precision** = matched detections ÷ all detections, on CrowdHuman (detections
+  inside annotated ignore-regions excluded). **Duplicates** = extra detections landing on
+  an already-claimed person ÷ matched detections.
+
+**Escape side (the purpose):**
+
+- **Detection recall** = GT people matched by any detection ÷ all GT people. Reported on
+  CrowdHuman (stratified by occlusion level) and on LAGENDA. An unmatched person = an
+  adult who can never be blurred.
+- **Adult→Child leak** = matched people with GT age ≥ 20 that the model labeled Child ÷
+  all matched GT-≥20 adults. The single most consequential classification number (Child =
+  deliberately unblurred). The full age-band curve (child-rate by GT age band) is reported
+  with it, because every architecture fades through the teens.
+- **Gender accuracy on adults** = correctly gendered ÷ matched GT adults. Wrong gender
+  blurs the wrong people AND un-blurs the right ones — both directions count.
+- **Child recall (≤ 12)** = GT children labeled Child ÷ matched GT children. Reported, but
+  it is the acceptable-error direction (an over-blurred child is safe), so it never
+  outranks the leak.
+
+**Supporting:**
+
+- **mAP (AP50 / AP75 / AP@[.5:.95])** — area under the precision-recall curve, sweeping
+  the model's own confidence ranking (COCO 101-point interpolation), per class then
+  averaged. Threshold-free, so it cross-checks that a verdict isn't a conf-0.45 artifact —
+  but it averages over all thresholds and both failure directions, so it is never the
+  decision number. Computed only where GT is exhaustive (Spotlight val 3-class;
+  CrowdHuman as single-class person-mAP).
+- **Latency** = median of 100 warm inferences, 4 threads, 640 px, on one machine per
+  session — cross-machine numbers are never compared. Model size = params + file bytes.
+
+## What a model must show to win a seat
+
+Beat the incumbent on the complaint metrics (object/PASS FPs) and hold or improve the
+escape metrics (recall, leak, gender) — or vice versa — with **no regression** on the
+other side, at a size and latency the product can ship. Accuracy, size, and speed are one
+table; winning a single column is not winning.
+
+## How "exact same data" is guaranteed (not just intended)
+
+1. **One physical copy.** All arms read the same frozen directories — no per-model
+   copies of eval data, ever.
+2. **Pinned membership.** The crowd sample's membership is the EXP-2026-03 SAM label stems,
+   materialized once as a symlink dir. Every model is pointed at that dir, not at CrowdHuman
+   itself.
+3. **Complete coverage, verified per run.** The Stage A runner
+   (`vlm-cluster/run_ultralytics_labels.py`) writes a label file for **every** processed image
+   — an empty file when the model found nothing — so "not processed" and "found nothing" are
+   distinguishable, and the scorers print `n_images_processed` / `n_gt_persons` /
+   `n_images_not_processed_yet`. These counts must be identical across arms.
+4. **Same operating point.** All arms run at the production settings: imgsz 640, conf 0.45,
+   NMS IoU 0.7. Raw sidecars additionally log every detection down to conf 0.05, so threshold
+   sweeps replay offline without re-running any model.
+5. **Same scorer, same matcher.** One scoring path for everyone:
+   `eval_negatives_crowd.py` (Component 1) + `run_autolabel_on_manifest.py` (Components 2+3),
+   both built on the same `match_boxes` (greedy mutual-exclusive, IoU ≥ 0.5).
+
+## Plugging in a new model (3-step recipe)
+
+1. **Dump labels.** If it loads via `ultralytics.YOLO`:
+   `python3 run_ultralytics_labels.py --model <weights.pt> --map identity --images <dataset_dir> --out /workspace/expNN/<arm>/<dataset> --conf 0.45`
+   (add `--prompts "woman,man,child"` for YOLOE-style promptable models). Class ids must be
+   `{0: Woman, 1: Man, 2: Child}`.
+2. **Run the four dumps** (lagenda / crowd_sample_imgs / pass_3k / object_set), then the four
+   scorer commands — copy them verbatim from `EXP-2026-12-POD-RUNBOOK.md` Phase C, changing
+   only the arm name in the paths.
+3. **Check the coverage counts match**, then read the summary JSONs. Headline numbers for the
+   comparison table: object-set %-images-with-FP, PASS FPs/100, crowd recall/precision, LAGENDA
+   detection recall, gender-on-adults, and the adult(GT≥20)→Child rate from
+   `call_rate_by_age`.
+
+For the holdout, see `docs/HOLDOUT_BENCHMARK_HANDOFF.md`.
+
 ## Where mAP fits (and why it is not on this scoreboard)
 
 mAP is deliberately absent here: it pools localization + classification + confidence-ranking

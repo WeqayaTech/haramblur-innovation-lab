@@ -8,7 +8,7 @@
 Train-calibrated full-INT8 (W8A8) TFLite exports lose 4.2 / 4.7 / 6.6 pts mAP50-95 at 640 px
 (`y26n_humanshaped_v2` / `y26n_noe2e_warm50-2` / `y26s_humanshaped_smallpatch_v1`) while mAP50
 is flat. A reviewer's hypothesis: the calibration data lacks variance. Mine
-(`docs/INT8_PREPROCESSING_PARITY.md` §4–5): the exporter quantizes the **final `[1,7,N]` output
+(`experiments/EXP-2026-21-preprocessing-parity-appendix.md` §4–5): the exporter quantizes the **final `[1,7,N]` output
 tensor** with a single per-tensor int8 scale (measured 0.0042, zero-point −128) shared by
 normalized box coordinates and class scores, so every box edge is snapped to a 0.0042·W grid
 (2.7 px at 640) and the high-IoU buckets of mAP50-95 collapse. Which is it?

@@ -71,7 +71,7 @@ Bars, written before running. Against `y26n_gradsupp` (the current recommendatio
 
 ## How we did it
 
-1. **The answer key.** Four frozen datasets, scored separately, never pooled (`docs/MODEL_EVAL_PROTOCOL.md`): LAGENDA (human apparent age + gender), CrowdHuman (exhaustively boxed crowds), PASS (verified-empty scenes), the 259 hand-verified doll/statue/toy images. Same physical copies, same matcher, same operating point as every model in `docs/MODEL_COMPARISON.md`.
+1. **The answer key.** Four frozen datasets, scored separately, never pooled (`docs/COMPONENT_FRAMEWORK.md`): LAGENDA (human apparent age + gender), CrowdHuman (exhaustively boxed crowds), PASS (verified-empty scenes), the 259 hand-verified doll/statue/toy images. Same physical copies, same matcher, same operating point as every model in `docs/MODEL_COMPARISON.md`.
 
 2. **The labels.** Re-emitted from the Spotlight verdicts that already exist — **no new API spend and no relabeling** — and written to the pod's local disk as part of staging rather than to the network volume, since they are a deterministic $0 re-emit and the volume quota is invisible to `df`. `verdicts_batch.jsonl` stored Gemini's gender for *every* detection, including the ones the 3-class emit collapsed to `Child` and discarded the gender of. Each person becomes two rows with identical geometry:
 
@@ -338,7 +338,7 @@ The `Woman→Man` 2.7 : 1 asymmetry measured here is fresh evidence for doing it
 
 ## Deployment note (not part of this experiment)
 
-The extension hardcodes the raw `[1, 4+C, N]` layout with class indices 0/1/2 and runs NMS in JS (`docs/DEPLOYMENT_LEARNING_CONTEXT.md:32-33`). Two axes ship on that same raw path — the tensor becomes `(1, 10, 8400)` and the JS does two argmaxes instead of one, applying the collapse rule above. The `end2end=True` `(1,300,6)` export **structurally cannot** carry two axes: its row has a single `cls` scalar. So export with `end2end=False`, which is what `y26nraw1` already ships. `decode_two_axis` in `run_ultralytics_labels.py` is the reference implementation for that JS.
+The extension hardcodes the raw `[1, 4+C, N]` layout with class indices 0/1/2 and runs NMS in JS (`the extension's raw tensor layout`). Two axes ship on that same raw path — the tensor becomes `(1, 10, 8400)` and the JS does two argmaxes instead of one, applying the collapse rule above. The `end2end=True` `(1,300,6)` export **structurally cannot** carry two axes: its row has a single `cls` scalar. So export with `end2end=False`, which is what `y26nraw1` already ships. `decode_two_axis` in `run_ultralytics_labels.py` is the reference implementation for that JS.
 
 ---
 
