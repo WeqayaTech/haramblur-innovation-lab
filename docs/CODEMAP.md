@@ -214,6 +214,9 @@ and diagnostics on verdicts/labels. All read from the volume, no API calls.
 | `sample_buckets.py` | 3 random examples from each of 4 mutually exclusive abstention buckets. | Active |
 | `sample_cards.py` | Stratified blind sample of Spotlight verdicts → `cards.json` (base64 crops). | Active |
 | `pass2.py`, `pass3.py`, `pass4.py` | Multi-pass unknown-gender analysis (face/sizeband/modelconf). | Active |
+| `rescued_samclass.py` | Of children rescued by the age-only rule, what did SAM3 independently call them? | Active |
+| `labelsize.py` | Label-file size distribution analysis. | Active |
+| `dets_diag.py` | Detection-level diagnostics (confidence/size/overlap distributions). | Active |
 
 ## Sol / Gemini 3.7 comparison (`vlm-cluster/sol_compare/`)
 
@@ -264,6 +267,21 @@ checkpoint, and augmentation that produced a specific trained model.
 | `resume_y26n_v2_distill_v1.py` | Resume script for the nano distillation run. | Active |
 | `small_object_patches.py` | The `SmallObjectPatches` augmentation class (standalone, imported by the trainers above). | Active |
 
+## VLM label-error analysis pipeline
+
+End-to-end pipeline for finding and confirming label errors using VLM-based independent reads.
+Runs on pod with GPU (VLM inference). The pipeline is: describe hard negatives → compare 3-way
+(Label vs Model vs VLM) → confirm label errors → flag VLM self-contradictions.
+
+| File | Purpose | Status |
+|---|---|---|
+| `describe_hardneg.py` | Describe confident misclassifications with VLM, tagged by confusion pair (`<gt>_as_<pred>`). | Active |
+| `annotate_focus.py` | Add disputed bounding box to existing hard-neg descriptions (no re-run needed). | Active |
+| `compare_classes.py` | Unified W/M/C Label vs Model confusion matrix + VLM verification of every mismatch. | Active |
+| `compare_child.py` | Label vs Model vs VLM 3-way comparison on child crops specifically. | Active |
+| `label_errors.py` | Confirm label errors where model + VLM agree against the dataset label (age-arbitrable). | Active |
+| `vlm_contradictions.py` | Flag VLM self-contradictions (gender read vs facial_hair/attire cues in same record). | Active |
+
 ## Historical val-set audit scripts (`vlm-cluster/historical/`)
 
 Scripts that ran once for closed experiments (pre-EXP-framework val-set audits), kept for
@@ -272,13 +290,7 @@ from them.
 
 | File | Purpose | Status |
 |---|---|---|
-| `describe_hardneg.py` | Describes the model's confident misclassifications (hard-negative focus). | Historical |
-| `annotate_focus.py` | Annotates focus areas for hard-negative analysis. | Historical |
-| `label_errors.py` | Confirms label errors from hard-negative descriptions. | Historical |
-| `vlm_contradictions.py` | Flags a VLM's self-contradictions (gender read vs attire cues). | Historical |
-| `compare_classes.py` | Label vs Model vs VLM 3-way class audit. | Historical |
 | `compare_gender.py` | Label vs Model vs VLM 3-way gender audit. | Historical |
-| `compare_child.py` | Label vs Model vs VLM 3-way child audit. | Historical |
 | `box_gallery.py` | EXP-2026-10 visual gallery of Lite's box corrections vs SAM3 vs GT. | Historical |
 | `cluster_failures.py` | Object-feature clustering of VLM failure dimensions (standalone, no pandas). | Historical |
 
