@@ -7,7 +7,6 @@
 .claude/scheduled_tasks.lock
 
 # local-only volume mount / mirrors of pod output (reproducible from the pod, not source)
-mnt/
 workspace/
 _*_review/
 deliverables/
@@ -30,14 +29,11 @@ runpod_volume/__pycache__/
 *.docx
 *.html
 
-# personal notes, not project docs
-RESUME_CONTEXT_haramblur.md
-RESUME_UPDATES_2026-08.md
-
-# stray backup from the CLAUDE.md restructure — keep locally, not in git
-CLAUDE.md.pre-refactor-*.bak.md
+# PNG copies of SVG charts (generated for ClickUp pasting, regenerate from the SVGs)
+experiments/assets/png/
 
 # python / OS junk
 __pycache__/
 *.pyc
+.ruff_cache/
 .DS_Store

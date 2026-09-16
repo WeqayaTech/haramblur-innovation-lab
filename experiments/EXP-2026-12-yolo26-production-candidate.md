@@ -370,7 +370,7 @@ retrain shows map_small 3.7→12.5 on an internal val set — ask which label va
 (labels/ vs labels_unk3) that used; if masked, it starts answering the small-person data
 question this experiment raised. Internal-val numbers are NOT comparable to this doc's
 component benchmarks — his checkpoints get a third column via the protocol
-(`docs/MODEL_EVAL_PROTOCOL.md`) when ready.
+(`docs/COMPONENT_FRAMEWORK.md`) when ready.
 
 ## What we can decide from this
 

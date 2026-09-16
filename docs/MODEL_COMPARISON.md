@@ -1,6 +1,6 @@
 # Model comparison — all measured models, side by side (updated 2026-08-08)
 
-Every model evaluated under the identical frozen protocol (`docs/MODEL_EVAL_OVERVIEW.md`:
+Every model evaluated under the identical frozen protocol (`docs/COMPONENT_FRAMEWORK.md`:
 same images verified by count, 640 px, conf 0.45, IoU-0.5 greedy matching, same scorers,
 one shared mAP evaluator). Scored **per dataset, never pooled** — the columns below are
 labeled by dataset and must not be averaged into a single score. Source experiments:
@@ -654,7 +654,7 @@ Raw outputs: `/workspace/exp_spotval_bench/<run_name>/{dump/raw, spotval_map.jso
 **A fifth benchmark for the same four models — never pool with the four above.** LAGENDA's
 `eval_v2` set (used earlier in this doc) still needs ignore regions because 4 of every 6
 real people lack a human label. `fl1199` (`/workspace/datasets/lagenda_full/fl1199/`,
-see `docs/LAGENDA_SOL_HANDOFF.md`) is a curated 1,199-image subset selected specifically
+see `docs/LAGENDA_HANDOFF.md`) is a curated 1,199-image subset selected specifically
 because **every person box has a human label** — no unlabeled people, so an unmatched
 detection is a genuine false positive, not an annotation gap. Verified directly on disk
 before running anything: `labels_3class` and `labels` (all boxes) both have exactly 1,514

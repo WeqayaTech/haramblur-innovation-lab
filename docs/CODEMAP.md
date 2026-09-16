@@ -29,16 +29,11 @@ core** = imported by many other scripts, treat signature changes as breaking.
 |---|---|---|
 | `describe.py` | Crops each labeled box, sends to a VLM (`--engine qwen\|openai\|gemini\|claude`), emits raw ~20-field JSON/person to `descriptions.jsonl`. Frozen prompt; `{cls}`-neutral so labels don't leak into the read. Resumable. | Active |
 | `api_describers.py` | Commercial-VLM engine classes (`OpenAIDescriber`/`GeminiDescriber`/`ClaudeDescriber`) with per-call token/USD tracking. `model_pricing.json` ships `null` rates — fill in before trusting a $ figure. `--selftest`. | Active |
-| `describe_hardneg.py`, `annotate_focus.py` | Describe the model's confident misclassifications specifically (hard-negative focus). | Historical (val-set audit era) |
-
 ## Step 2 — score reads vs ground truth
 
 | File | Purpose | Status |
 |---|---|---|
 | `eval_taxonomy.py` | Scores model reads vs GT under chosen taxonomy schemes; accuracy/confusion/coverage + diagnostics (by-age accuracy, threshold sweep, gender-by-age). CPU-only. | Active |
-| `label_errors.py` | Confirms label errors from hard-negative descriptions. | Historical |
-| `vlm_contradictions.py` | Flags a VLM's self-contradictions (gender read vs attire cues). | Historical |
-| `compare_classes.py`, `compare_gender.py`, `compare_child.py` | Label vs Model vs VLM 3-way audits, val-set era (pre-EXP-framework). | Historical |
 
 ## Production-model / auto-labeler scoring (EXP-2026-02, 12, 13, 14, 16, 19...)
 
@@ -189,6 +184,22 @@ core** = imported by many other scripts, treat signature changes as breaking.
 | `experiments/make_charts_bench_mac.py` | Apple-silicon latency charts: grouped bars per model × size × precision at 1 and 4 threads, INT8-over-fp32 speed-up Mac vs pod, and `SUMMARY.md` with p90/spread and the EPYC columns; reads `models/bench_mac_20260915/bench_mac_m2_all.json` + `models/exp22_20260914/bench_matrix.json`. | Active |
 | `experiments/make_charts_pr_quant.py` | Threshold-vs-recall/precision figures for one model across export precisions (fp32 `.pt` vs INT8 W8A8 vs INT8 + float-decode fix): recall panel, precision panel, magnified INT8−fp32 delta panel, confidence-ceiling markers; reads `models/pr_quant_20260914/*.json` from `pr_curve.py --grid-step 0.01 --agnostic`, writes one SVG per dataset×size×{any person, Woman, Man, Child} plus `SUMMARY.md` tables to `experiments/assets/pr_quant/`. | Active |
 | `experiments/make_charts.py`, `make_charts_exp02.py`, `..._exp03.py`, `..._exp04.py`, `..._exp09.py`, `..._exp10.py`, `..._exp12.py` | Generate standalone SVG charts from hardcoded eval numbers, one file per experiment; some also do the SVG→PNG Chrome-headless conversion for ClickUp. Pattern: copy the most recent one (`make_charts_exp12.py`) rather than starting from scratch. | Active (one-off per experiment, expected to keep growing — this is normal, not debt) |
+
+## Historical val-set audit scripts (`vlm-cluster/historical/`)
+
+Scripts that ran once for closed experiments (pre-EXP-framework val-set audits), kept for
+reference and reproducibility. They form a self-contained import cluster; nothing active imports
+from them.
+
+| File | Purpose | Status |
+|---|---|---|
+| `describe_hardneg.py` | Describes the model's confident misclassifications (hard-negative focus). | Historical |
+| `annotate_focus.py` | Annotates focus areas for hard-negative analysis. | Historical |
+| `label_errors.py` | Confirms label errors from hard-negative descriptions. | Historical |
+| `vlm_contradictions.py` | Flags a VLM's self-contradictions (gender read vs attire cues). | Historical |
+| `compare_classes.py` | Label vs Model vs VLM 3-way class audit. | Historical |
+| `compare_gender.py` | Label vs Model vs VLM 3-way gender audit. | Historical |
+| `compare_child.py` | Label vs Model vs VLM 3-way child audit. | Historical |
 
 ---
 

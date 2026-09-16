@@ -57,7 +57,7 @@ survive unchanged?
 
 Components measured: 1, 2, 3 per `docs/COMPONENT_FRAMEWORK.md`, plus Spotlight-val mAP
 (label-alignment, per the framework's mAP ruling) — same protocol as every model in
-`docs/MODEL_EVAL_PROTOCOL.md`, same four datasets, conf 0.45, raw sidecars to 0.05.
+`docs/COMPONENT_FRAMEWORK.md`, same four datasets, conf 0.45, raw sidecars to 0.05.
 
 ### Pre-registered bars (written 2026-08-05, before any training)
 
@@ -85,7 +85,7 @@ Components measured: 1, 2, 3 per `docs/COMPONENT_FRAMEWORK.md`, plus Spotlight-v
 3. **Arm C:** `vlm-cluster/train_gradsuppress.py` (new; mechanism + verify-yourself below).
    Warm-start `yolo26n.pt`, 30 epochs, same hyps as y26n_ft for comparability.
 4. **Eval:** the standard four datasets + Spotlight-val mAP, scored per
-   `docs/MODEL_EVAL_PROTOCOL.md`; results appended to `EXP-2026-12-TEAM-BRIEF.md`.
+   `docs/COMPONENT_FRAMEWORK.md`; results appended to `EXP-2026-12-TEAM-BRIEF.md`.
 
 ## What we found
 

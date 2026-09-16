@@ -1,10 +1,71 @@
-# Benchmarking against `haramblur_holdout` — handoff
+# `haramblur_holdout` — path reference + benchmark handoff
 
-Paste the block below into a fresh chat to benchmark any model against the holdout
-evaluation set. **All flags below were verified against `--help` on the pod 2026-08-19**,
-not written from memory.
+Dataset root on the RunPod volume:
+
+```
+/workspace/datasets/haramblur_holdout/
+```
+
+**This is a HOLDOUT TEST SET. Never train on it.** It carries a `DO_NOT_TRAIN` marker.
 
 ---
+
+## Quick path reference
+
+| What | Path |
+|---|---|
+| **Images** (11,494) | `labeling/full/images/` |
+| **Labels for evaluation** | `labeling/full/labels_eval/` (classes 0=Woman, 1=Man, 2=Child) |
+| **Ignore regions** (must pass to scorer) | `labeling/full/ignore/` (1,619 unknown-gender people) |
+| **Labels with Unknown** | `labeling/full/labels_unk3/` (class 3 = Unknown) |
+| **SAM3 raw output** | `labeling/full/raw/<stem>.txt` + `<stem>.json` (sidecars) |
+| **Gemini verdicts** | `labeling/full/run/verdicts_batch.jsonl` (21,004 rows) |
+| **Run record** | `labeling/FULL_RUN.md` |
+| **Dedup list** | `clean/FINAL_unique.txt` (the canonical 11,494) |
+
+**Two things that silently break a scorer if missed:**
+1. Labels are **segment polygons** (26-48+ coords/row), not boxes — use `seg_boxes`.
+2. `images/` holds **symlinks** — copy with `cp -rL` to dereference.
+
+Per collection (filename prefix): `child__` 1,247 · `men__` 1,436 · `randoms__` 2,023
+(person-free) · `shiekhs__` 2,897 (Gulf-dress) · `women__` 2,939 · `women_hd__` 952.
+
+For running another VLM (Sol, Claude...) on the holdout detections, see
+`docs/SAM3_OUTPUT_HANDOFF.md` (sidecar schema, the `build_crop`/`PROMPT` imports, and
+the Gemini baseline to diff against).
+
+## Full layout
+
+```
+/workspace/datasets/haramblur_holdout/
+├── DO_NOT_TRAIN
+├── README.md                     source, census, dedup method, caveats
+├── EVAL_VERIFICATION.html
+├── SAM3_OUTPUT_HANDOFF.md        → give to anyone running another VLM
+├── images/<collection>/          raw images (6 collections)
+├── _archives/                    original zips + SHA256SUMS.txt
+├── clean/                        FINAL_unique.txt + per-collection lists
+├── census.json / census_files.jsonl
+├── FINAL_dedup.json / pdq_calibration.json / cluster_gallery_31.html
+└── labeling/
+    ├── FULL_RUN.md               run record: results, findings, traps
+    ├── tools/                    all scripts (re-runnable)
+    └── full/
+        ├── images/               11,494 symlinks
+        ├── raw/                  SAM3 labels + raw sidecars
+        ├── labels_eval/          classes 0-2 (score against this)
+        ├── labels_unk3/          classes 0-3
+        ├── ignore/               1,619 Unknown regions
+        ├── run/                  verdicts, audit, cost, batch ledger
+        └── traces/               stage-by-stage proof HTMLs
+```
+
+---
+
+## Benchmarking a model
+
+Paste the block below into a fresh chat. **All flags verified against `--help` on the pod
+2026-08-19.**
 
 ## Paste this into the new chat
 

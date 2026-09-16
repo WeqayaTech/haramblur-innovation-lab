@@ -1,20 +1,17 @@
-# The SPOTLIGHT pipeline (v1): SAM3 detects → mask-highlighted crops → Flash-Lite gates, labels, and refines
+# The Spotlight pipeline — design spec + one-page overview
 
-**Name (adopted 2026-07-24):** *Spotlight* — for every detected person, the pipeline puts them
-alone in the spotlight (their exact mask outlined) and asks the judge to rule on that one
-person. Stages: **Detect → Spotlight → Verify → Merge → Emit+Audit.**
+**What it does:** turns raw images into clean training labels. SAM3 finds every person;
+each one is put "in the spotlight" (their exact mask outlined in a crop) and Gemini 3.5
+Flash-Lite judges exactly that person: real or not, man/woman/child, plus attributes for
+later analysis. Fake detections get deleted, wrong labels get corrected, and every raw
+reading is kept. Cost: ~$1 per 1,000 people labeled (~half on Batch API).
 
-**In one line:** SAM3 finds every person and supplies geometry; every detection becomes a
-padded crop with that person's own mask *highlighted* (not cut out); Gemini 3.5 Flash-Lite
-judges the highlighted person — real? gender? age? better box? — and the merge rules assemble
-the final training label.
+Stages: **Detect → Spotlight → Verify → Merge → Emit+Audit.**
 
-**Status:** design spec, 2026-07-23. This is the buildable v1 of
-`PIPELINE_PROPOSAL_dual_vote_labeler.md` — simplified from four models to two because
-EXP-2026-08 measured that gating **every** detection costs ~$0.54/1k (Batch ~half), which makes
-the dual-pipeline "route only disagreements" economics optional rather than necessary. The
-dual-vote design (second detector + MiVOLO) remains the planned v2 upgrade path, not a v1
-blocker. Every seat assignment below is backed by a measured number (sources cited inline).
+**Status:** validated in EXP-2026-10, went to production 2026-07-28. The full production
+run is documented in `docs/SPOTLIGHT_PRODUCTION_RUN.md`. What follows is the original v1
+design spec (2026-07-23), kept as the canonical reference for why each design decision was
+made. Every seat assignment is backed by a measured number (sources cited inline).
 
 ---
 
