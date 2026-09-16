@@ -58,6 +58,10 @@ core** = imported by many other scripts, treat signature changes as breaking.
 | `matrix_lib.sh` + `full_matrix.sh` + `run_cells.sh` + `join_pod.sh` | **EXP-2026-22 multi-pod matrix.** `matrix_lib.sh` holds the config and the `export_all` / `cell` / `report_line` functions (fp32 / FP16 / INT8 / float-decode exports, Spotlight-val or holdout scoring incl. per-collection + `randoms_fp.py`, JSON-validated skip, empty-sidecar purge). `full_matrix.sh gpu|cpu|exports` runs single-pod queues; `run_cells.sh <list> [P]` is the multi-pod **claim queue** (each cell = atomic `mkdir /workspace/exp22/claims/<cell>`, P cells in parallel, threads = cores/P, claim only once a slot is free); `join_pod.sh <name>` bootstraps any fresh pod (local venv on the container disk, then the runner). `make_lists.py` writes the priority-ordered cell lists; `make_shards.py` is the superseded static planner. | Active |
 | `matrix_status.py` | One-screen status + sanity check for a multi-pod run: done / claimed / running per host, stalled claims, `CELL_FAILED`s, corrupt JSONs, and accuracy bands (n_images, plausible mAP, fp32-TFLite vs `.pt` ≤ 0.010, FP16 vs fp32 ≤ 0.002, INT8/fix within [−0.12, +0.06] of `.pt`). Run on any pod with the volume. | Active |
 | `bootstrap_pod.sh` | New-pod bootstrap for multi-pod shards: builds the CPU/GPU venv, then runs `run_cells.sh` on that pod's shard list. `bash bootstrap_pod.sh <podname>`. | Active |
+| `join_pod.sh` | Join a fresh CPU/GPU pod to the EXP-22 queue: builds a local venv (container disk), then starts the claim runner. `bash join_pod.sh <podname> [P]`. | Active |
+| `cpu_start.sh` | Wait for the shared CPU venv on the volume, then start this pod's queue runner. `cpu_start.sh <name> <P>`. | Active |
+| `bench_all.sh` | CPU latency @640 for every model × {fp32, fp16, int8, fdec} on an idle pod → `bench.json`. | Active |
+| `scan_raw.py` | Validates raw JSON sidecars in the matrix eval dir; reports corrupt/truncated files. | Active |
 | `reset_claims.sh` | 3-line helper: drops claim dirs for cells that have no `_map.json` (dead runners). Run only when no `run_cells.sh` is active. | Active |
 | `fp16_cast.py`, `randoms_fp.py` | Weight-cast an fp32 `.tflite` to float16 (ai_edge_quantizer `float_casting`, carries `metadata.json`); false-blur arm of the holdout (`randoms__*` person-free images: image FP rate and boxes/100 at conf 0.25 / 0.45) from a raw dump. | Active |
 | `build_matrix_report.py` | Renders the precision × resolution × dataset report (Spotlight-val + holdout, pooled and per-collection dominant-class AP, per-class @640, optional latency table) from `*_map.json` files into one self-contained HTML; missing cells render as "—" so it can be re-run as the matrix fills. | Active |
@@ -104,6 +108,7 @@ core** = imported by many other scripts, treat signature changes as breaking.
 | `pipeline_v1_eval.py` | Runs/scores the full assembled pipeline v1 (`run`/`score`/`compare`/`selftest`). | Historical (superseded by production `parallel_emit.py`+`spotlight_batch.py` path) |
 | `verify_labels.py`, `verify_datasets.py` | Post-hoc verification: emitted Spotlight labels are internally consistent; staged datasets on the volume match `DATASET_REGISTRY.md`'s expected state. | Active |
 | `estimate_cost.py` | Accurate cost/time estimate for labeling a target corpus with Spotlight, before running it. | Active |
+| `dump_crops.py` | Dumps Spotlight-style crops for every SAM3 detection so an agent can view each crop and produce the verdict JSON directly (no Gemini call). Reuses `spotlight_run.build_crop` so crops are byte-identical. `--selftest`. | Active |
 | `pod_setup.sh` | Fresh-pod setup for the Spotlight pipeline: installs deps, fixes torch/SAM3 DTensor import, pins threads, verifies imports + selftests. Source it (`source pod_setup.sh`) so exports reach your shell. Warns on Blackwell pods. | Active |
 | `mk_runmeta.py`* | *(referenced in CLAUDE.md, lives under `labeling/tools/` per-dataset, not `vlm-cluster/`)* Reconstructs `run_meta.json`+`cost_report.json` for Batch-API runs that never wrote them, by hashing the live `PROMPT` constant. | Active |
 
@@ -203,6 +208,8 @@ from them.
 | `compare_classes.py` | Label vs Model vs VLM 3-way class audit. | Historical |
 | `compare_gender.py` | Label vs Model vs VLM 3-way gender audit. | Historical |
 | `compare_child.py` | Label vs Model vs VLM 3-way child audit. | Historical |
+| `box_gallery.py` | EXP-2026-10 visual gallery of Lite's box corrections vs SAM3 vs GT. | Historical |
+| `cluster_failures.py` | Object-feature clustering of VLM failure dimensions (standalone, no pandas). | Historical |
 
 ---
 
